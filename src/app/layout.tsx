@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, Montserrat, Urbanist } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+
+// Font for headings
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+// Font for body/paragraphs
+const urbanist = Urbanist({
+  subsets: ["latin"],
+  variable: "--font-urbanist",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+export const metadata: Metadata = {
+  title: "WorkivaX - Find Your Dream Job",
+  description: "Connect with top employers and discover opportunities that match your skills and aspirations",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${montserrat.variable} ${urbanist.variable} font-sans antialiased`}
+      >
+        {children}
+        <Toaster position="top-right" richColors />
+      </body>
+    </html>
+  );
+}
+``;
