@@ -60,8 +60,8 @@ const EmployerDashboard = async () => {
 
       {/* Two Column Layout for Recent Jobs and Applications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Recent Applicatiapplications={applications} ons */}
-        <RecentApplications />
+        {/* Recent Applications */}
+        <RecentApplications applications={applications} />
 
         {/* Recent Jobs */}
         <Card>

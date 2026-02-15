@@ -4,6 +4,7 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { updateUserThemeAction } from "@/features/auth/server/theme.actions";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -22,8 +23,19 @@ export function ThemeToggle() {
     );
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const toggleTheme = async () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    
+    // Update theme immediately for instant feedback
+    setTheme(newTheme);
+    
+    // Silently save to database without showing toasts
+    try {
+      await updateUserThemeAction(newTheme);
+    } catch (error) {
+      // Silent error handling - could log to console if needed
+      console.error("Failed to save theme preference:", error);
+    }
   };
 
   return (

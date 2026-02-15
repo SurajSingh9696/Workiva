@@ -9,6 +9,7 @@ export interface IUser extends Document {
   role: 'admin' | 'applicant' | 'employer';
   phoneNumber?: string;
   avatarUrl?: string;
+  theme?: 'light' | 'dark';
   deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +46,11 @@ const userSchema = new Schema<IUser>(
     },
     avatarUrl: {
       type: String,
+    },
+    theme: {
+      type: String,
+      enum: ['light', 'dark'],
+      default: 'light',
     },
     deletedAt: {
       type: Date,

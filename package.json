@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@edge-runtime/cookies": "^6.0.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -27,8 +28,10 @@
     "busboy": "^1.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.11.17",
+    "helmet": "^8.1.0",
     "lucide-react": "^0.544.0",
     "mongoose": "^8.7.3",
     "next": "^15.5.7",

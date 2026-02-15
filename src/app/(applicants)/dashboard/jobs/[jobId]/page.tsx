@@ -72,7 +72,7 @@ const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
 
           {/* Title & Meta */}
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               {job.title}
             </h1>
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
@@ -108,7 +108,7 @@ const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
         {/* LEFT COLUMN: Description (2/3) */}
         <div className="lg:col-span-2 space-y-8">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl font-bold text-foreground mb-4">
               About the Job
             </h2>
             <div
@@ -121,7 +121,7 @@ const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
           {/* Tags */}
           {job.tags && (
             <section className="pt-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
                 Skills & Technologies
               </h3>
               <div className="flex flex-wrap gap-2">

@@ -1,8 +1,7 @@
-import mysql2 from "mysql2/promise";
-import { drizzle } from "drizzle-orm/mysql2";
+// Legacy MySQL/Drizzle configuration - replaced by MongoDB
+// This file is kept for reference only
+// Active database configuration is in src/lib/mongodb.ts
 
-const pool = mysql2.createPool({
-  uri: process.env.DATABASE_URL as string,
-});
-
-export const db = drizzle(pool);
+export const legacyDbConfig = {
+  note: "This project now uses MongoDB with Mongoose instead of MySQL with Drizzle ORM"
+};

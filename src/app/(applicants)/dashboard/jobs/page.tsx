@@ -95,8 +95,8 @@ export default async function JobsPage({ searchParams }: PageProps) {
         </div>
       ) : (
         // Empty State
-        <div className="flex h-[400px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-center">
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">
+        <div className="flex h-[400px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted text-center">
+          <h3 className="mt-4 text-lg font-semibold text-foreground">
             No jobs found
           </h3>
           <p className="text-gray-500">

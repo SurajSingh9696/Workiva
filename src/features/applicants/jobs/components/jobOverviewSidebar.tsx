@@ -115,7 +115,7 @@ function OverviewItem({
       <div className="mt-1">{icon}</div>
       <div>
         <p className="text-xs font-medium text-gray-500 uppercase">{label}</p>
-        <p className="text-sm font-semibold text-gray-900 capitalize">
+        <p className="text-sm font-semibold text-foreground capitalize">
           {value}
         </p>
       </div>

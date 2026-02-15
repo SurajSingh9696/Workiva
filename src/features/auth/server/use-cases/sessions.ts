@@ -50,19 +50,36 @@ export const createSessionAndSetCookies = async (
   const token = generateSessionToken();
   const ip = await getIPAddress();
   const headersList = await headers();
+  const userAgent = headersList.get("user-agent") || "";
 
   await createUserSession({
     token,
     userId: userId,
-    userAgent: headersList.get("user-agent") || "",
+    userAgent,
     ip: ip,
   });
 
   const cookieStore = await cookies();
-
-  cookieStore.set("session", token, {
-    secure: true,
+  
+  // Enhanced cookie settings for mobile compatibility and security
+  const cookieOptions = {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const, // Better for mobile apps and cross-site requests
+    maxAge: SESSION_LIFETIME,
+    path: '/', // Ensure cookie is available across all routes
+    domain: process.env.NODE_ENV === 'production' 
+      ? process.env.COOKIE_DOMAIN || undefined 
+      : undefined, // Allow domain setting for production
+  };
+
+  cookieStore.set("session", token, cookieOptions);
+  
+  // Set additional security cookie for CSRF protection
+  const csrfToken = crypto.randomBytes(32).toString('hex');
+  cookieStore.set("csrf-token", csrfToken, {
+    ...cookieOptions,
+    httpOnly: false, // Needs to be accessible to frontend for API requests
     maxAge: SESSION_LIFETIME,
   });
 };
@@ -119,6 +136,7 @@ export const validateSessionAndGetUser = async (session: string) => {
     phoneNumber: user.phoneNumber,
     email: user.email,
     avatarUrl: user.avatarUrl,
+    theme: user.theme || 'light',
     deletedAt: user.deletedAt,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

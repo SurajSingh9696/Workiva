@@ -1,4 +1,4 @@
-import LoginForm from "@/features/auth/components/login-form";
+import EnhancedLoginForm from "@/features/auth/components/enhanced-login-form";
 import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { redirect } from "next/navigation";
 
@@ -13,7 +13,7 @@ const LoginPage = async () => {
 
   return (
     <>
-      <LoginForm />
+      <EnhancedLoginForm />
     </>
   );
 };

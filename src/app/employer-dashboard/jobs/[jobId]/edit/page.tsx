@@ -12,13 +12,15 @@ export const EditJobPage = async ({ params }: EditJobPageProps) => {
   const { jobId } = await params;
 
   // 1. Fetch Data
-  const { status, data: job } = await getJobByIdAction(jobId);
-  console.log("Job Data after ID: ", job);
+  const result = await getJobByIdAction(jobId);
+  console.log("Job Data after ID: ", result);
 
   // 2. Handle Errors (e.g., user manually types a random ID)
-  if (status === "ERROR" || !job) {
+  if (result.status === "ERROR" || !('data' in result) || !result.data) {
     redirect("/employer-dashboard/jobs");
   }
+
+  const job = result.data;
 
   return (
     <div className="max-w-3xl mx-auto py-8 space-y-6">

@@ -1,4 +1,4 @@
-import ApplicantSidebar from "@/features/applicants/components/applicant-sidebar";
+import ApplicantDashboardWrapper from "@/components/applicant-dashboard-wrapper";
 import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -21,13 +21,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <ApplicantSidebar user={{ name: user.name, avatarUrl: user.avatarUrl }} />
-      <main className="flex-1 h-full overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8">
-          {children}
-        </div>
-      </main>
-    </div>
+    <ApplicantDashboardWrapper user={{ name: user.name, avatarUrl: user.avatarUrl }}>
+      {children}
+    </ApplicantDashboardWrapper>
   );
 }
