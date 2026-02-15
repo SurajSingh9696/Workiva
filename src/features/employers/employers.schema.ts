@@ -32,6 +32,13 @@ export const teamSizes = [
 ] as const;
 
 export const employerProfileSchema = z.object({
+  userName: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters long")
+    .max(255, "Name must not exceed 255 characters")
+    .optional(),
+
   name: z
     .string()
     .trim()

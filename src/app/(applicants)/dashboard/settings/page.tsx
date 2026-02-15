@@ -1,6 +1,8 @@
 import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { ApplicantSettingsForm } from "@/features/applicants/components/applicant-settings-form";
 import { getApplicantProfile } from "@/features/applicants/server/applicant.queries";
+import { PageHeader } from "@/components/page-header";
+import { Settings } from "lucide-react";
 
 export default async function ApplicantSettingsPage() {
   const user = await getCurrentUser();
@@ -12,13 +14,12 @@ export default async function ApplicantSettingsPage() {
   const profile = await getApplicantProfile(user.id);
 
   return (
-    <div className="space-y-6 p-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your personal information and preferences
-        </p>
-      </div>
+    <div className="space-y-6 p-6">
+      <PageHeader
+        icon={Settings}
+        title="Profile Settings"
+        description="Manage your personal information and preferences"
+      />
 
       <ApplicantSettingsForm initialData={{ user, profile }} />
     </div>

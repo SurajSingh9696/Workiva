@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { updateApplicantProfileAction } from "../server/applicant.actions";
 import { toast } from "sonner";
-import { User, MapPin, Calendar, Globe, Briefcase } from "lucide-react";
+import { User, MapPin, Calendar, Globe, Briefcase, FileText, Upload } from "lucide-react";
 
 interface ApplicantSettingsFormProps {
   initialData: {
@@ -21,6 +21,49 @@ interface ApplicantSettingsFormProps {
 export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProps) {
   const { user, profile } = initialData;
   const [isLoading, setIsLoading] = useState(false);
+  const [resumePreview, setResumePreview] = useState<string | null>(profile?.resumeUrl || null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 1024 * 1024; // 1MB
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 1MB");
+      return;
+    }
+
+    if (!file.type.includes("pdf")) {
+      toast.error("Only PDF files are allowed for resumes");
+      return;
+    }
+
+    setUploadingResume(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Upload failed");
+      }
+
+      setResumePreview(result.data.base64);
+      toast.success("Resume uploaded successfully");
+    } catch (error) {
+      console.error("Resume upload error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to upload resume");
+    } finally {
+      setUploadingResume(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,6 +71,8 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
 
     const formData = new FormData(e.currentTarget);
     const data = {
+      name: formData.get("name") as string,
+      phoneNumber: formData.get("phoneNumber") as string,
       biography: formData.get("biography") as string,
       dateOfBirth: formData.get("dateOfBirth") as string || null,
       nationality: formData.get("nationality") as string,
@@ -41,17 +86,19 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
 
     const result = await updateApplicantProfileAction(data);
     
-    if (result.status === "SUCCESS") {
+    if (result && result.status === "SUCCESS") {
       toast.success(result.message);
-    } else {
+    } else if (result) {
       toast.error(result.message);
+    } else {
+      toast.error("An error occurred. Please try again.");
     }
 
     setIsLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
       {/* Personal Information */}
       <Card>
         <CardHeader>
@@ -66,9 +113,9 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
+                name="name"
                 defaultValue={user.name}
-                disabled
-                className="bg-gray-50"
+                placeholder="Enter your full name"
               />
             </div>
             <div className="space-y-2">
@@ -88,10 +135,10 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
               <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
                 id="phoneNumber"
+                name="phoneNumber"
                 type="tel"
                 defaultValue={user.phoneNumber || ""}
-                disabled
-                className="bg-gray-50"
+                placeholder="+1 (555) 123-4567"
               />
             </div>
             <div className="space-y-2">
@@ -220,6 +267,48 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
                 className="pl-10"
               />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Resume
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="resume">Upload Resume (PDF, Max 1MB)</Label>
+            <div className="flex items-center gap-4">
+              <Input
+                id="resume"
+                type="file"
+                accept="application/pdf"
+                onChange={handleResumeUpload}
+                disabled={uploadingResume}
+                className="cursor-pointer"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={uploadingResume}
+                onClick={() => document.getElementById("resume")?.click()}
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+            </div>
+            {uploadingResume && (
+              <p className="text-sm text-muted-foreground">Uploading resume...</p>
+            )}
+            {resumePreview && !uploadingResume && (
+              <div className="flex items-center gap-2 text-sm text-green-600">
+                <FileText className="h-4 w-4" />
+                <span>Resume uploaded successfully</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

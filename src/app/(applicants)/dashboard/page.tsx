@@ -2,11 +2,16 @@ import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Bookmark, FileText, TrendingUp, Search, ArrowRight } from "lucide-react";
+import { Briefcase, Bookmark, FileText, TrendingUp, Search, ArrowRight, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { getApplicantApplications } from "@/features/applicants/server/applications.queries";
 import { getSavedJobs } from "@/features/applicants/server/saved-jobs.queries";
 import { getAllJobs } from "@/features/employers/jobs/server/jobs.queries";
+import { PageHeader } from "@/components/page-header";
+
+// Disable caching to ensure real-time updates
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const ApplicantDashboard = async () => {
   const user = await getCurrentUser();
@@ -49,15 +54,11 @@ const ApplicantDashboard = async () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, <span className="text-blue-600">{user.name}</span>
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Track your applications and discover new opportunities
-        </p>
-      </div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title={`Welcome back, ${user.name}`}
+        description="Track your applications and discover new opportunities"
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">

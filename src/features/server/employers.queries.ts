@@ -1,30 +1,43 @@
 import { getCurrentUser } from "../auth/server/auth.queries";
-import { employers } from "../../drizzle/schema";
-import { db } from "@/config/db";
-import { eq } from "drizzle-orm";
+import Employer from "../../models/Employer";
+import mongoose from "mongoose";
+import { connectDB } from "@/lib/mongodb";
 
 export const getCurrentEmployerDetails = async () => {
-  const currentUser = await getCurrentUser();
+  try {
+    const currentUser = await getCurrentUser();
 
-  console.log("currentUser: ", currentUser);
+    if (!currentUser) return null;
 
-  if (!currentUser) return null;
+    if (currentUser.role !== "employer") return null;
 
-  if (currentUser.role !== "employer") return null;
+    await connectDB();
 
-  const [employer] = await db
-    .select()
-    .from(employers)
-    .where(eq(employers.id, currentUser.id));
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    }).lean();
 
-  console.log("employer: ", employer);
+    if (!employer) return null;
 
-  const isProfileCompleted =
-    employer.name &&
-    employer.description &&
-    currentUser.avatarUrl &&
-    employer.organizationType &&
-    employer.yearOfEstablishment;
+    const isProfileCompleted =
+      employer.name &&
+      employer.description &&
+      currentUser.avatarUrl &&
+      employer.organizationType &&
+      employer.yearOfEstablishment;
 
-  return { ...currentUser, employerDetails: employer, isProfileCompleted };
+    // Convert ObjectIds to strings for client component compatibility
+    const employerDetails = {
+      ...employer,
+      _id: employer._id.toString(),
+      userId: employer.userId.toString(),
+    };
+
+    return { ...currentUser, employerDetails, isProfileCompleted };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Get current employer details error:", error);
+    }
+    return null;
+  }
 };

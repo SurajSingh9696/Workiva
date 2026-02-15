@@ -13,7 +13,7 @@ import { updateApplicationStatusAction } from "../server/employer.actions";
 import { toast } from "sonner";
 
 interface ApplicationStatusUpdaterProps {
-  applicationId: number;
+  applicationId: string;
   currentStatus: string;
 }
 
@@ -38,6 +38,16 @@ export function ApplicationStatusUpdater({
     setIsUpdating(false);
   };
 
+  // Determine which statuses should be disabled based on current status
+  const isOptionDisabled = (option: string) => {
+    const statusOrder = ["pending", "reviewing", "accepted", "rejected"];
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    const optionIndex = statusOrder.indexOf(option);
+    
+    // Disable options that are before the current status in the sequence
+    return optionIndex < currentIndex;
+  };
+
   return (
     <div className="flex gap-3 items-center">
       <Select value={status} onValueChange={setStatus}>
@@ -45,10 +55,18 @@ export function ApplicationStatusUpdater({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="reviewing">Reviewing</SelectItem>
-          <SelectItem value="accepted">Accepted</SelectItem>
-          <SelectItem value="rejected">Rejected</SelectItem>
+          <SelectItem value="pending" disabled={isOptionDisabled("pending")}>
+            Pending
+          </SelectItem>
+          <SelectItem value="reviewing" disabled={isOptionDisabled("reviewing")}>
+            Reviewing
+          </SelectItem>
+          <SelectItem value="accepted" disabled={isOptionDisabled("accepted")}>
+            Accepted
+          </SelectItem>
+          <SelectItem value="rejected" disabled={isOptionDisabled("rejected")}>
+            Rejected
+          </SelectItem>
         </SelectContent>
       </Select>
       <Button

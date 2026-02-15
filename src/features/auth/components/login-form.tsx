@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Lock, Mail, UserCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, UserCheck, ArrowLeft } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -42,13 +42,20 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Link
+        href="/"
+        className="fixed top-6 left-6 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Home
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
             <UserCheck className="w-8 h-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl">Join Our Job Portal</CardTitle>
-          <CardDescription>Create your account to get started</CardDescription>
+          <CardTitle className="text-2xl">Welcome Back</CardTitle>
+          <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -115,17 +122,17 @@ const LoginForm: React.FC = () => {
 
             {/* Submit Button */}
             <Button type="submit" className="w-full">
-              Create Account
+              Sign In
             </Button>
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?
+                Don't have an account?{" "}
                 <Link
                   href="/register"
                   className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
                 >
-                  Sign in here
+                  Sign up here
                 </Link>
               </p>
             </div>

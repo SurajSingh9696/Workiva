@@ -62,8 +62,8 @@ const JobOverviewSidebar = ({ job }: JobSidebarProps) => {
           </CardContent>
         </Card>
 
-        {/* Company Snippet Card */}
-        <Card>
+        {/* Company Snippet Card - Only visible on mobile/tablet */}
+        <Card className="lg:hidden">
           <CardHeader>
             <CardTitle className="text-base">About the Company</CardTitle>
           </CardHeader>

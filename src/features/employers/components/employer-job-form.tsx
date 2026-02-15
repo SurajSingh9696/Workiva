@@ -41,6 +41,7 @@ import {
   updateJobAction,
 } from "@/features/server/jobs.actions";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface JobPostFormProps {
   initialData?: any; // The job data fetched from DB
@@ -112,44 +113,58 @@ export const JobForm = ({
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardContent>
-        <form className="space-y-6" onSubmit={handleSubmit(handleFormSubmit)}>
-          <div className="space-y-2">
-            <Label htmlFor="title">Job Title *</Label>
+    <Card className="w-full max-w-5xl mx-auto shadow-lg border-2">
+      <CardContent className="p-6 sm:p-8">
+        <form className="space-y-6 sm:space-y-8" onSubmit={handleSubmit(handleFormSubmit)}>
+          {/* Job Title */}
+          <motion.div 
+            className="space-y-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0 }}
+          >
+            <Label htmlFor="title" className="text-base font-semibold">Job Title *</Label>
             <div className="relative">
-              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 id="title"
                 type="text"
                 placeholder="e.g., Senior Frontend Developer"
-                className={cn("pl-10", errors.title && "border-destructive")}
+                className={cn(
+                  "pl-11 h-12 text-base transition-all",
+                  errors.title && "border-destructive focus:ring-destructive"
+                )}
                 {...register("title")}
                 aria-invalid={!!errors.title}
               />
             </div>
             {errors.title && (
-              <p className="text-sm text-destructive">
+              <p className="text-sm text-destructive flex items-center gap-1">
                 {errors.title.message as string}
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* Job Type, Work Type, Job Level */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <motion.div 
+            className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
             <div className="space-y-2">
-              <Label htmlFor="jobType">Job Type *</Label>
+              <Label htmlFor="jobType" className="text-sm font-semibold">Job Type *</Label>
               <Controller
                 name="jobType"
                 control={control}
                 render={({ field }) => (
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="jobType"
                         className={cn(
-                          "pl-10 w-full",
+                          "pl-10 w-full h-11 transition-all",
                           errors.jobType && "border-destructive",
                         )}
                       >
@@ -174,18 +189,18 @@ export const JobForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="workType">Work Type *</Label>
+              <Label htmlFor="workType" className="text-sm font-semibold">Work Type *</Label>
               <Controller
                 name="workType"
                 control={control}
                 render={({ field }) => (
                   <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="workType"
                         className={cn(
-                          "pl-10 w-full",
+                          "pl-10 w-full h-11 transition-all",
                           errors.workType && "border-destructive",
                         )}
                       >
@@ -210,18 +225,18 @@ export const JobForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="jobLevel">Job Level *</Label>
+              <Label htmlFor="jobLevel" className="text-sm font-semibold">Job Level *</Label>
               <Controller
                 name="jobLevel"
                 control={control}
                 render={({ field }) => (
                   <div className="relative">
-                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="jobLevel"
                         className={cn(
-                          "pl-10 w-full",
+                          "pl-10 w-full h-11 transition-all",
                           errors.jobLevel && "border-destructive",
                         )}
                       >
@@ -244,20 +259,25 @@ export const JobForm = ({
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Location and Tags */}
-          <div className="grid gap-6 md:grid-cols-2">
+          {/* Location and Minimum Education */}
+          <motion.div 
+            className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
             <div className="space-y-2">
-              <Label htmlFor="location">Location (Optional)</Label>
+              <Label htmlFor="location" className="text-sm font-semibold">Location</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="location"
                   type="text"
                   placeholder="e.g., New York, NY or Remote"
                   className={cn(
-                    "pl-10",
+                    "pl-11 h-11 transition-all",
                     errors.location && "border-destructive",
                   )}
                   {...register("location")}
@@ -272,14 +292,14 @@ export const JobForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (Optional)</Label>
+              <Label htmlFor="tags" className="text-sm font-semibold">Tags</Label>
               <div className="relative">
-                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="tags"
                   type="text"
                   placeholder="e.g., React, TypeScript, Node.js"
-                  className={cn("pl-10", errors.tags && "border-destructive")}
+                  className={cn("pl-11 h-11 transition-all", errors.tags && "border-destructive")}
                   {...register("tags")}
                   aria-invalid={!!errors.tags}
                 />
@@ -290,27 +310,34 @@ export const JobForm = ({
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Salary Information */}
-          <div className="grid gap-6 md:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="minSalary">Min Salary (Optional)</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="minSalary"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="e.g., 50000"
-                  className={cn(
-                    "pl-10",
-                    errors.minSalary && "border-destructive",
-                  )}
-                  {...register("minSalary")}
-                  aria-invalid={!!errors.minSalary}
-                />
-              </div>
+          <motion.div 
+            className="space-y-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+          >
+            <Label className="text-base font-semibold">Salary Range (Optional)</Label>
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
+              <div className="space-y-2">
+                <Label htmlFor="minSalary" className="text-xs">Min Salary</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="minSalary"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="50000"
+                    className={cn(
+                      "pl-10 h-11",
+                      errors.minSalary && "border-destructive",
+                    )}
+                    {...register("minSalary")}
+                    aria-invalid={!!errors.minSalary}
+                  />
+                </div>
               {errors.minSalary && (
                 <p className="text-sm text-destructive">
                   {errors.minSalary.message as string}
@@ -318,23 +345,23 @@ export const JobForm = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="maxSalary">Max Salary (Optional)</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="maxSalary"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="e.g., 80000"
-                  className={cn(
-                    "pl-10",
-                    errors.maxSalary && "border-destructive",
-                  )}
-                  {...register("maxSalary")}
-                  aria-invalid={!!errors.maxSalary}
-                />
-              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxSalary" className="text-xs">Max Salary</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="maxSalary"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="80000"
+                    className={cn(
+                      "pl-10 h-11",
+                      errors.maxSalary && "border-destructive",
+                    )}
+                    {...register("maxSalary")}
+                    aria-invalid={!!errors.maxSalary}
+                  />
+                </div>
               {errors.maxSalary && (
                 <p className="text-sm text-destructive">
                   {errors.maxSalary.message as string}
@@ -342,20 +369,20 @@ export const JobForm = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="salaryCurrency">Currency</Label>
-              <Controller
-                name="salaryCurrency"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger
-                      id="salaryCurrency"
-                      className={cn(
-                        "w-full",
-                        errors.salaryCurrency && "border-destructive",
-                      )}
-                    >
+              <div className="space-y-2">
+                <Label htmlFor="salaryCurrency" className="text-xs">Currency</Label>
+                <Controller
+                  name="salaryCurrency"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        id="salaryCurrency"
+                        className={cn(
+                          "w-full h-11",
+                          errors.salaryCurrency && "border-destructive",
+                        )}
+                      >
                       <SelectValue placeholder="Currency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -375,20 +402,20 @@ export const JobForm = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="salaryPeriod">Period</Label>
-              <Controller
-                name="salaryPeriod"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger
-                      id="salaryPeriod"
-                      className={cn(
-                        "w-full",
-                        errors.salaryPeriod && "border-destructive",
-                      )}
-                    >
+              <div className="space-y-2">
+                <Label htmlFor="salaryPeriod" className="text-xs">Period</Label>
+                <Controller
+                  name="salaryPeriod"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        id="salaryPeriod"
+                        className={cn(
+                          "w-full h-11",
+                          errors.salaryPeriod && "border-destructive",
+                        )}
+                      >
                       <SelectValue placeholder="Period" />
                     </SelectTrigger>
                     <SelectContent>
@@ -408,22 +435,28 @@ export const JobForm = ({
               )}
             </div>
           </div>
+          </motion.div>
 
-          {/* Education and Experience */}
-          <div className="grid gap-6 md:grid-cols-2">
+          {/* Education, Experience, and Expiry Date */}
+          <motion.div 
+            className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
             <div className="space-y-2">
-              <Label htmlFor="minEducation">Minimum Education (Optional)</Label>
+              <Label htmlFor="minEducation" className="text-sm font-semibold">Minimum Education</Label>
               <Controller
                 name="minEducation"
                 control={control}
                 render={({ field }) => (
                   <div className="relative">
-                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="minEducation"
                         className={cn(
-                          "pl-10 w-full",
+                          "pl-10 w-full h-11",
                           errors.minEducation && "border-destructive",
                         )}
                       >
@@ -448,14 +481,37 @@ export const JobForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expiresAt">Expiry Date (Optional)</Label>
+              <Label htmlFor="experience" className="text-sm font-semibold">Experience Required</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Award className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="experience"
+                  type="text"
+                  placeholder="e.g., 3+ years"
+                  className={cn(
+                    "pl-11 h-11",
+                    errors.experience && "border-destructive",
+                  )}
+                  {...register("experience")}
+                  aria-invalid={!!errors.experience}
+                />
+              </div>
+              {errors.experience && (
+                <p className="text-sm text-destructive">
+                  {errors.experience.message as string}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expiresAt" className="text-sm font-semibold">Expiry Date</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="expiresAt"
                   type="date"
                   className={cn(
-                    "pl-10",
+                    "pl-11 h-11",
                     errors.expiresAt && "border-destructive",
                   )}
                   {...register("expiresAt")}
@@ -468,45 +524,26 @@ export const JobForm = ({
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Experience */}
-          <div className="space-y-2">
-            <Label htmlFor="experience">
-              Experience Requirements (Optional)
-            </Label>
-            <div className="relative">
-              <Award className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="experience"
-                type="text"
-                placeholder="e.g., 3+ years of React development"
-                className={cn(
-                  "pl-10",
-                  errors.experience && "border-destructive",
-                )}
-                {...register("experience")}
-                aria-invalid={!!errors.experience}
-              />
-            </div>
-            {errors.experience && (
-              <p className="text-sm text-destructive">
-                {errors.experience.message as string}
-              </p>
-            )}
-          </div>
-
+          {/* Job Description */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
           <Controller
             name="description"
             control={control}
             render={({ field, fieldState }) => (
               <div className="space-y-2">
-                <Label>Job Description *</Label>
-                <Tiptap
-                  content={field.value}
-                  onChange={(value) => field.onChange(value)}
-                  // toolbarClassName="top-16"
-                />
+                <Label className="text-base font-semibold">Job Description *</Label>
+                <div className="rounded-lg border-2 transition-all hover:border-blue-300 focus-within:border-blue-500">
+                  <Tiptap
+                    content={field.value}
+                    onChange={(value) => field.onChange(value)}
+                  />
+                </div>
                 {fieldState.error && (
                   <p className="text-sm text-destructive">
                     {fieldState.error.message}
@@ -515,24 +552,27 @@ export const JobForm = ({
               </div>
             )}
           />
+          </motion.div>
 
-          <div className="flex items-center gap-4 pt-4 flex-wrap">
+          {/* Submit Button */}
+          <div className="flex items-center gap-4 pt-6 border-t flex-wrap">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full md:w-auto"
+              size="lg"
+              className="w-full sm:w-auto px-8 h-12 text-base font-semibold"
             >
-              {isSubmitting && <Loader className="w-4 h-4 animate-spin" />}
+              {isSubmitting && <Loader className="w-5 h-5 animate-spin mr-2" />}
               {isEditMode
                 ? isSubmitting
-                  ? "Saving..."
-                  : "Update Job"
+                  ? "Updating Job..."
+                  : "Update Job Posting"
                 : isSubmitting
-                  ? "Saving..."
-                  : "Post Job"}
+                  ? "Creating Job..."
+                  : "Publish Job Posting"}
             </Button>
-            {!isDirty && (
-              <p className="text-sm text-muted-foreground">
+            {!isDirty && !isSubmitting && (
+              <p className="text-sm text-muted-foreground italic">
                 No changes to save
               </p>
             )}

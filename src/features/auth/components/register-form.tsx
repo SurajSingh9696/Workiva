@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Lock, Mail, User, UserCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User, UserCheck, ArrowLeft } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -35,9 +35,12 @@ const RegistrationForm = () => {
     register,
     handleSubmit,
     control,
-    formState: { errors },
-  } = useForm({
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterUserWithConfirmData>({
     resolver: zodResolver(registerUserWithConfirmSchema),
+    defaultValues: {
+      role: "applicant",
+    },
   });
 
   const router = useRouter();
@@ -46,18 +49,31 @@ const RegistrationForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onSubmit = async (data: RegisterUserWithConfirmData) => {
-    const result = await registerUserAction(data);
+    try {
+      const result = await registerUserAction(data);
 
-    if (result.status === "SUCCESS") {
-      if (data.role === "employer") router.push("/employer-dashboard");
-      else router.push("/dashboard");
+      if (result.status === "SUCCESS") {
+        toast.success(result.message);
+        if (data.role === "employer") router.push("/employer-dashboard");
+        else router.push("/dashboard");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
-    if (result.status === "SUCCESS") toast.success(result.message);
-    else toast.error(result.message);
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Link
+        href="/"
+        className="fixed top-6 left-6 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Home
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
@@ -80,9 +96,14 @@ const RegistrationForm = () => {
                   placeholder="Enter your full name"
                   required
                   {...register("name")}
-                  className={`pl-10 `}
+                  className={`pl-10 ${errors.name ? "border-destructive" : ""}`}
                 />
               </div>
+              {errors.name && (
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             {/* Username Field */}
@@ -119,9 +140,14 @@ const RegistrationForm = () => {
                   placeholder="Enter your email"
                   {...register("email")}
                   required
-                  className={`pl-10 `}
+                  className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Role Selection */}
@@ -132,7 +158,7 @@ const RegistrationForm = () => {
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className={`w-full ${errors.role ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -141,7 +167,12 @@ const RegistrationForm = () => {
                     </SelectContent>
                   </Select>
                 )}
-              ></Controller>
+              />
+              {errors.role && (
+                <p className="text-sm text-destructive">
+                  {errors.role.message}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -155,7 +186,7 @@ const RegistrationForm = () => {
                   placeholder="Create a strong password"
                   required
                   {...register("password")}
-                  className={`pl-10 pr-10 `}
+                  className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
                 />
 
                 <Button
@@ -172,6 +203,11 @@ const RegistrationForm = () => {
                   )}
                 </Button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password Field */}
@@ -185,7 +221,7 @@ const RegistrationForm = () => {
                   placeholder="Confirm your password"
                   required
                   {...register("confirmPassword")}
-                  className={`pl-10 pr-10 `}
+                  className={`pl-10 pr-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
                 />
                 <Button
                   type="button"
@@ -201,16 +237,21 @@ const RegistrationForm = () => {
                   )}
                 </Button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?
+                Already have an account?{" "}
                 <Link
                   href="/login"
                   className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"

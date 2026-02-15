@@ -1,24 +1,25 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { MapPin, Clock, Building2 } from "lucide-react";
+import { MapPin, Clock, Building2, Globe } from "lucide-react";
 
 import { getJobById } from "@/features/employers/jobs/server/jobs.queries";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import JobOverviewSidebar from "@/features/applicants/jobs/components/jobOverviewSidebar";
 import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { checkIfApplied } from "@/features/applicants/server/applications.queries";
 import { checkIfSaved } from "@/features/applicants/server/saved-jobs.queries";
 import { JobActions } from "@/features/applicants/jobs/components/job-actions";
+import Link from "next/link";
 
 interface EditJobPageProps {
-  params: { jobId: string };
+  params: Promise<{ jobId: string }>;
 }
 
 const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
   // 1. Validate & Fetch
-  const jobId = parseInt(params.jobId);
-  if (isNaN(jobId)) return notFound();
+  const { jobId } = await params;
 
   const job = await getJobById(jobId);
   console.log("job: ", job);
@@ -37,6 +38,19 @@ const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
 
   return (
     <div className="container mx-auto max-w-6xl py-10 px-4 space-y-8">
+      {/* --- BANNER IMAGE --- */}
+      {job.companyBanner && (
+        <div className="relative w-full h-48 md:h-64 overflow-hidden rounded-2xl border shadow-sm">
+          <Image
+            src={job.companyBanner}
+            alt={`${job.companyName} banner`}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      )}
+      
       {/* --- HERO HEADER --- */}
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between border-b pb-8">
         <div className="flex gap-5">
@@ -119,6 +133,34 @@ const JobsDetailedPage = async ({ params }: EditJobPageProps) => {
               </div>
             </section>
           )}
+
+          {/* Company Info - Visible on large screens, below job description */}
+          <Card className="hidden lg:block">
+            <CardHeader>
+              <CardTitle className="text-base">About the Company</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p
+                className="text-sm text-gray-600 prose prose-sm"
+                dangerouslySetInnerHTML={{
+                  __html: job.companyBio || "No company description available.",
+                }}
+              />
+
+              {job.companyWebsite && (
+                <Link
+                  href={job.companyWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit company website (opens in new tab)"
+                  className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
+                >
+                  <Globe className="h-4 w-4" />
+                  Visit Website
+                </Link>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* RIGHT COLUMN: Sidebar (1/3) */}

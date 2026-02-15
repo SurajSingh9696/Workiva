@@ -5,6 +5,7 @@ import {
   Bookmark,
   Settings,
   Plus,
+  FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -127,6 +128,12 @@ export const employerNavItems: NavItem[] = [
     href: "/employer-dashboard/jobs",
     icon: Briefcase,
     // Note: /jobs exact match chahiye but /jobs/[jobId]/edit allow karna hai
+  },
+  {
+    name: "Applications",
+    href: "/employer-dashboard/applications",
+    icon: FileText,
+    badge: "dynamic",
   },
   {
     name: "Settings",

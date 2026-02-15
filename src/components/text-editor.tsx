@@ -73,7 +73,12 @@ const Tiptap = ({
           <FloatingMenu editor={editor} />
         </>
       )}
-      <EditorContent editor={editor} className="min-h-[300px] px-4 py-3" />
+      <div 
+        onClick={() => editor?.commands.focus()}
+        className="cursor-text"
+      >
+        <EditorContent editor={editor} className="min-h-[300px] px-4 py-3" />
+      </div>
     </div>
   );
 };
@@ -107,7 +112,7 @@ function LinkComponent({
 
   return (
     <Popover open={isLinkPopoverOpen} onOpenChange={setIsLinkPopoverOpen}>
-      <PopoverTrigger>{children}</PopoverTrigger>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
       {/* // this is the main */}
       {/* trigger point */}
       <PopoverContent className="w-80 p-4">

@@ -1,32 +1,13 @@
 "use server";
 
-import { db } from "@/config/db";
+import { connectDB } from "@/lib/mongodb";
 import { getCurrentUser } from "../auth/server/auth.queries";
-import { employers, users } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import Employer from "@/models/Employer";
+import User from "@/models/User";
 import { EmployerProfileData } from "../employers/employers.schema";
-
-// const organizationTypeOptions = [
-//   "development",
-//   "business",
-//   "design",
-//   "android dev",
-//   "cloud business",
-// ] as const;
-// type OrganizationType = (typeof organizationTypeOptions)[number];
-
-// const teamSizeOptions = ["1-5", "6-20", "21-50"] as const;
-// type TeamSize = (typeof teamSizeOptions)[number];
-
-// interface IFormInput {
-//   name: string;
-//   description: string;
-//   yearOfEstablishment: string;
-//   location: string;
-//   websiteUrl: string;
-//   organizationType: OrganizationType;
-//   teamSize: TeamSize;
-// }
+import mongoose from "mongoose";
+import { handleServerError, ErrorMessages } from "@/lib/error-handler";
+import { revalidatePath } from "next/cache";
 
 export const updateEmployerProfileAction = async (
   data: EmployerProfileData
@@ -34,10 +15,11 @@ export const updateEmployerProfileAction = async (
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser || currentUser.role !== "employer") {
-      return { status: "ERROR", message: "Unauthorized" };
+      return { status: "ERROR" as const, message: ErrorMessages.UNAUTHORIZED };
     }
 
     const {
+      userName,
       name,
       description,
       yearOfEstablishment,
@@ -49,9 +31,22 @@ export const updateEmployerProfileAction = async (
       bannerImageUrl,
     } = data;
 
-    const updatedEmployer = await db
-      .update(employers)
-      .set({
+    console.log("[UPDATE_PROFILE] Updating with data:", {
+      userId: currentUser.id,
+      userName,
+      name,
+      hasAvatarUrl: !!avatarUrl,
+      avatarUrlLength: avatarUrl?.length,
+      hasBannerUrl: !!bannerImageUrl,
+      bannerUrlLength: bannerImageUrl?.length,
+    });
+
+    await connectDB();
+
+    // Update employer profile
+    const updatedEmployer = await Employer.findOneAndUpdate(
+      { userId: new mongoose.Types.ObjectId(currentUser.id) },
+      {
         name,
         description,
         location,
@@ -62,23 +57,38 @@ export const updateEmployerProfileAction = async (
         yearOfEstablishment: yearOfEstablishment
           ? parseInt(yearOfEstablishment)
           : null,
-      })
-      .where(eq(employers.id, currentUser.id));
+      },
+      { upsert: true, new: true }
+    );
 
-    console.log("employers ", updatedEmployer);
+    console.log("[UPDATE_PROFILE] Employer updated:", {
+      employerId: updatedEmployer._id.toString(),
+      hasBannerUrl: !!updatedEmployer.bannerImageUrl,
+    });
 
-    await db
-      .update(users)
-      .set({
-        avatarUrl,
-      })
-      .where(eq(users.id, currentUser.id));
+    // Update user avatar and name
+    const userUpdates: any = { avatarUrl };
+    if (userName !== undefined && userName.trim()) {
+      userUpdates.name = userName;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser.id,
+      userUpdates,
+      { new: true }
+    );
 
-    return { status: "SUCCESS", message: "Profile updated successfully" };
+    if (updatedUser) {
+      console.log("[UPDATE_PROFILE] User updated:", {
+        userId: updatedUser._id.toString(),
+        hasAvatarUrl: !!updatedUser.avatarUrl,
+      });
+    }
+
+    revalidatePath("/employer-dashboard/settings");
+    revalidatePath("/employer-dashboard");
+    return { status: "SUCCESS" as const, message: "Profile updated successfully!" };
   } catch (error) {
-    return {
-      status: "ERROR",
-      message: "Something went wrong, please try again",
-    };
+    return handleServerError(error);
   }
 };

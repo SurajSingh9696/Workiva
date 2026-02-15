@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Bookmark, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { JobCard } from "@/features/employers/jobs/components/jobCard";
+import { PageHeader } from "@/components/page-header";
 
 export default async function SavedJobsPage() {
   const user = await getCurrentUser();
@@ -17,18 +18,16 @@ export default async function SavedJobsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Saved Jobs</h1>
-          <p className="text-muted-foreground mt-2">
-            Jobs you've bookmarked for later
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
+      <PageHeader
+        icon={Bookmark}
+        title="Saved Jobs"
+        description="Jobs you've bookmarked for later"
+      >
+        <div className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
           <Bookmark className="h-5 w-5" />
           <span className="font-semibold">{savedJobs.length} saved</span>
         </div>
-      </div>
+      </PageHeader>
 
       {savedJobs.length === 0 ? (
         <Card className="p-12 text-center">

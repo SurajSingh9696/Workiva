@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 interface JobActionsProps {
-  jobId: number;
+  jobId: string;
   hasApplied: boolean;
   isSaved: boolean;
 }
@@ -52,10 +52,10 @@ export function JobActions({ jobId, hasApplied: initialHasApplied, isSaved: init
     setIsSaving(true);
     const result = await toggleSaveJobAction(jobId);
     
-    if (result.status === "SUCCESS") {
+    if (result && result.status === "SUCCESS") {
       toast.success(result.message);
-      setIsSaved(result.isSaved || false);
-    } else {
+      setIsSaved((result as any).isSaved || false);
+    } else if (result) {
       toast.error(result.message);
     }
     

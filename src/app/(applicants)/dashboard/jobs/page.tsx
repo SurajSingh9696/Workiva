@@ -37,6 +37,12 @@ import {
   getAllJobs,
   JobFilterParams,
 } from "@/features/employers/jobs/server/jobs.queries";
+import { PageHeader } from "@/components/page-header";
+import { Search } from "lucide-react";
+
+// Disable caching to ensure real-time updates
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -71,15 +77,11 @@ export default async function JobsPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Page Header */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-          Find your Next Dream Job
-        </h1>
-        <p className="text-gray-500">
-          Browse latest job openings from top companies.
-        </p>
-      </div>
+      <PageHeader
+        icon={Search}
+        title="Find Your Next Dream Job"
+        description="Browse latest job openings from top companies"
+      />
 
       {/* 3. Add the Filter Component Here */}
       <JobFilters />

@@ -1,19 +1,15 @@
 import { JobForm } from "@/features/employers/components/employer-job-form";
 import { getJobByIdAction } from "@/features/server/jobs.actions";
 import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/page-header";
+import { Edit } from "lucide-react";
 
 interface EditJobPageProps {
-  params: { jobId: string };
+  params: Promise<{ jobId: string }>;
 }
 
 export const EditJobPage = async ({ params }: EditJobPageProps) => {
-  const jobId = Number(params.jobId);
-
-  // if (Number.isNaN(jobId)) {
-  //   throw new Error("Invalid job ID");
-  // } ❌
-
-  if (Number.isNaN(jobId)) redirect("/employer-dashboard/jobs");
+  const { jobId } = await params;
 
   // 1. Fetch Data
   const { status, data: job } = await getJobByIdAction(jobId);
@@ -25,10 +21,12 @@ export const EditJobPage = async ({ params }: EditJobPageProps) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Edit Job: {job.title}</h1>
-      </div>
+    <div className="max-w-3xl mx-auto py-8 space-y-6">
+      <PageHeader
+        icon={Edit}
+        title={`Edit Job: ${job.title}`}
+        description="Update your job posting details"
+      />
 
       {/* 3. Pass the fetched data to the form */}
       <JobForm initialData={job} isEditMode={true} />

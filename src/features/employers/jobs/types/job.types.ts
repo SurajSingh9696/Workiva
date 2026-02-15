@@ -16,10 +16,10 @@ export type SalaryPeriod = (typeof SALARY_PERIOD)[number];
 export type MinEducation = (typeof MIN_EDUCATION)[number];
 
 export interface Job {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  employerId: number;
+  employerId: string;
 
   jobType: JobType;
   workType: WorkType;
@@ -43,6 +43,6 @@ export interface Job {
 
 export interface JobCardProps {
   job: Job;
-  onEdit?: (jobId: number) => void;
-  onDelete?: (jobId: number) => void;
+  onEdit?: (jobId: string) => void;
+  onDelete?: (jobId: string) => void;
 }

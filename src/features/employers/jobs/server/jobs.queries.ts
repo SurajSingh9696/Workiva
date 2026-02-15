@@ -1,10 +1,9 @@
-// src/features/jobs/server/jobs.queries.ts
-import { db } from "@/config/db";
-import { jobs, employers, users } from "@/drizzle/schema";
-import { eq, and, isNull, desc, or, gte, SQL, like } from "drizzle-orm";
-import { JobLevel } from "../types/job.types";
+import { connectDB } from "@/lib/mongodb";
+import Job from "@/models/Job";
+import Employer from "@/models/Employer";
+import User from "@/models/User";
+import mongoose from "mongoose";
 
-// 2. Define the Interface
 export interface JobFilterParams {
   search?: string;
   jobType?: string;
@@ -13,137 +12,127 @@ export interface JobFilterParams {
 }
 
 export async function getAllJobs(filters: JobFilterParams = {}, limit?: number) {
-  console.log("filers real: ", filters);
+  await connectDB();
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time to 00:00:00
+  today.setHours(0, 0, 0, 0);
 
-  // Base Rule
-  const conditions: (SQL | undefined)[] = [
-    isNull(jobs.deletedAt),
-    or(isNull(jobs.expiresAt), gte(jobs.expiresAt, today)),
-  ];
+  // Build query conditions
+  const query: any = {
+    deletedAt: null,
+    $or: [
+      { expiresAt: null },
+      { expiresAt: { $gte: today } }
+    ],
+  };
 
-  //search
+  // Add search filter
   if (filters?.search) {
-    // 1: react - mern stack react title , react, react thapa
-    // % - wildcard
-    // 2: company name, tags, title  - LIKE() - contains
-    // 3: OR
-
-    const searchTerm = `%${filters.search}%`;
-
-    conditions.push(
-      or(
-        like(jobs.title, searchTerm),
-        like(employers.name, searchTerm),
-        like(jobs.tags, searchTerm),
-      ),
-    );
+    const searchRegex = new RegExp(filters.search, 'i');
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { title: searchRegex },
+        { tags: searchRegex },
+      ],
+    });
   }
 
+  // Add other filters
   if (filters?.jobType && filters.jobType !== "all") {
-    conditions.push(eq(jobs.jobType, filters.jobType as any));
+    query.jobType = filters.jobType;
   }
 
   if (filters?.jobLevel && filters.jobLevel !== "all") {
-    conditions.push(eq(jobs.jobLevel, filters.jobLevel as any));
+    query.jobLevel = filters.jobLevel;
   }
 
   if (filters?.workType && filters.workType !== "all") {
-    conditions.push(eq(jobs.workType, filters.workType as any));
+    query.workType = filters.workType;
   }
 
-  let query = db
-    .select({
-      id: jobs.id,
-      title: jobs.title,
-      description: jobs.description,
-      minSalary: jobs.minSalary,
-      maxSalary: jobs.maxSalary,
-      salaryCurrency: jobs.salaryCurrency,
-      salaryPeriod: jobs.salaryPeriod,
-      location: jobs.location,
-      jobType: jobs.jobType,
-      workType: jobs.workType,
-      createdAt: jobs.createdAt,
-      companyName: employers.name,
-      companyLogo: users.avatarUrl,
+  let jobQuery = Job.find(query)
+    .populate({
+      path: 'employerId',
+      populate: {
+        path: 'userId',
+        model: User,
+      },
     })
-    .from(jobs)
-    .innerJoin(employers, eq(jobs.employerId, employers.id))
-    .innerJoin(users, eq(employers.id, users.id)) // Join users to get avatar
-    // .where(
-    //   and(
-    //     isNull(jobs.deletedAt),
-    //     or(isNull(jobs.expiresAt), gte(jobs.expiresAt, today)),
-    //   ),
-    // )
-    .where(and(...conditions))
-    .orderBy(desc(jobs.createdAt));
+    .sort({ createdAt: -1 });
 
-  // Add limit if provided
   if (limit) {
-    query = query.limit(limit) as any;
+    jobQuery = jobQuery.limit(limit);
   }
 
-  const jobsData = await query;
+  const jobsData = await jobQuery.lean();
 
-  return jobsData;
+  return jobsData.map((job: any) => ({
+    id: job._id.toString(),
+    title: job.title,
+    description: job.description,
+    minSalary: job.minSalary,
+    maxSalary: job.maxSalary,
+    salaryCurrency: job.salaryCurrency,
+    salaryPeriod: job.salaryPeriod,
+    location: job.location,
+    jobType: job.jobType,
+    workType: job.workType,
+    createdAt: job.createdAt,
+    companyName: job.employerId?.name,
+    companyLogo: job.employerId?.userId?.avatarUrl,
+    companyBanner: job.employerId?.bannerImageUrl,
+  }));
 }
 
-// 🪄 AUTOMATIC TYPE EXPORT
-// This creates a type based on EXACTLY what getAllJobs returns.
-// If you add a field above, this type updates automatically.
 export type JobCardType = Awaited<ReturnType<typeof getAllJobs>>[number];
 
-/**
- * Get a Single Job by ID with full details
- * Purpose: For the Single Job Details Page (/jobs/[id])
- */
-export async function getJobById(jobId: number) {
-  const job = await db
-    .select({
-      // Basic Info
-      id: jobs.id,
-      title: jobs.title,
-      description: jobs.description, // Full HTML description
-      tags: jobs.tags,
+export async function getJobById(jobId: string) {
+  await connectDB();
 
-      // Salary Details
-      minSalary: jobs.minSalary,
-      maxSalary: jobs.maxSalary,
-      salaryCurrency: jobs.salaryCurrency,
-      salaryPeriod: jobs.salaryPeriod,
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return null;
+  }
 
-      // Job Meta Data (Crucial for Sidebar)
-      location: jobs.location,
-      jobType: jobs.jobType, // e.g. "remote"
-      workType: jobs.workType, // e.g. "full-time"
-      jobLevel: jobs.jobLevel, // e.g. "senior"
-      experience: jobs.experience, // e.g. "3-5 years"
-      minEducation: jobs.minEducation, // e.g. "bachelors"
-
-      // Timestamps
-      createdAt: jobs.createdAt,
-      expiresAt: jobs.expiresAt,
-
-      // Employer Info (Joined)
-      companyLogo: users.avatarUrl,
-      companyName: employers.name,
-      companyBio: employers.description, // Good to show "About Company"
-      companyWebsite: employers.websiteUrl,
-      companyLocation: employers.location,
+  const job = await Job.findById(jobId)
+    .populate({
+      path: 'employerId',
+      populate: {
+        path: 'userId',
+        model: User,
+      },
     })
-    .from(jobs)
-    .innerJoin(employers, eq(jobs.employerId, employers.id))
-    .innerJoin(users, eq(employers.id, users.id))
-    .where(eq(jobs.id, jobId)) // 🎯 Filter by the specific ID
-    .limit(1); // We only want one result
+    .lean();
 
-  // Return the first item (or undefined if not found)
-  return job[0];
+  if (!job) return null;
+
+  const employer = job.employerId as any;
+
+  return {
+    id: job._id.toString(),
+    title: job.title,
+    description: job.description,
+    tags: job.tags,
+    minSalary: job.minSalary,
+    maxSalary: job.maxSalary,
+    salaryCurrency: job.salaryCurrency,
+    salaryPeriod: job.salaryPeriod,
+    location: job.location,
+    jobType: job.jobType,
+    workType: job.workType,
+    jobLevel: job.jobLevel,
+    experience: job.experience,
+    minEducation: job.minEducation,
+    createdAt: job.createdAt,
+    expiresAt: job.expiresAt,
+    companyLogo: employer?.userId?.avatarUrl,
+    companyBanner: employer?.bannerImageUrl,
+    companyName: employer?.name,
+    companyBio: employer?.description,
+    companyWebsite: employer?.websiteUrl,
+    companyLocation: employer?.location,
+  };
 }
 
-// 🪄 Create the Type for the Details Page
 export type JobDetailsType = Awaited<ReturnType<typeof getJobById>>;

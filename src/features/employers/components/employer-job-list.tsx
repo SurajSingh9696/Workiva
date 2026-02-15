@@ -38,7 +38,7 @@ export const EmployerJobList = () => {
     fetchJobs();
   }, []);
 
-  const handleDelete = async (jobId: number) => {
+  const handleDelete = async (jobId: string) => {
     try {
       const res = await deleteJobAction(jobId);
       if (res.status === "SUCCESS") {
@@ -52,7 +52,7 @@ export const EmployerJobList = () => {
     }
   };
 
-  const handleEdit = async (jobId: number) => {
+  const handleEdit = async (jobId: string) => {
     router.push(`/employer-dashboard/jobs/${jobId}/edit`);
   };
 

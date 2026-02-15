@@ -4,8 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { Briefcase, MapPin, Building2, Calendar, ExternalLink } from "lucide-react";
+import { Briefcase, MapPin, Building2, Calendar, ExternalLink, FileText } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
+
+// Disable caching to ensure real-time updates
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ApplicationsPage() {
   const user = await getCurrentUser();
@@ -25,12 +30,11 @@ export default async function ApplicationsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Applications</h1>
-        <p className="text-muted-foreground mt-2">
-          Track all your job applications in one place
-        </p>
-      </div>
+      <PageHeader
+        icon={FileText}
+        title="My Applications"
+        description="Track all your job applications in one place"
+      />
 
       {applications.length === 0 ? (
         <Card className="p-12 text-center">

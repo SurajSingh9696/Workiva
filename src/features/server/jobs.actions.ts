@@ -1,146 +1,254 @@
 "use server";
 
-import { db } from "@/config/db";
+import { connectDB } from "@/lib/mongodb";
 import { JobFormData, jobSchema } from "../employers/jobs/jobs.schema";
-import { jobs } from "@/drizzle/schema";
+import Job from "@/models/Job";
+import Employer from "@/models/Employer";
 import { getCurrentUser } from "../auth/server/auth.queries";
-import { and, eq } from "drizzle-orm";
-import { Job } from "../employers/jobs/types/job.types";
+import { Job as JobType } from "../employers/jobs/types/job.types";
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
+import { handleServerError, ErrorMessages } from "@/lib/error-handler";
 
 export const createJobAction = async (data: JobFormData) => {
   try {
     const { success, data: result, error } = jobSchema.safeParse(data);
     if (!success) {
-      console.log("❌ ZOD ERRORS:", error.flatten());
-      console.log("❌ RECEIVED DATA:", data);
-
       return {
-        status: "ERROR",
+        status: "ERROR" as const,
         message: error.issues[0].message,
       };
     }
 
     const currentUser = await getCurrentUser();
     if (!currentUser || currentUser.role !== "employer") {
-      return { status: "ERROR", message: "Unauthorized" };
+      return { status: "ERROR" as const, message: ErrorMessages.UNAUTHORIZED };
     }
 
-    await db.insert(jobs).values({ ...result, employerId: currentUser.id });
-    return { status: "SUCCESS", message: "Job posted successfully" };
+    await connectDB();
 
-    // console.log("server job post data: ", data);
-    // console.log("server job post data 2: ", result);
+    // Get employer profile
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    });
+
+    if (!employer) {
+      return { status: "ERROR" as const, message: "Please complete your employer profile first" };
+    }
+
+    await Job.create({ ...result, employerId: employer._id });
+    revalidatePath("/employer-dashboard/jobs");
+    return { status: "SUCCESS" as const, message: "Job posted successfully!" };
   } catch (error) {
-    return {
-      status: "ERROR",
-      message: "Something went wrong, please try again",
-    };
+    return handleServerError(error);
   }
 };
 
-// //to fetch the data from the jobs table
-// type GetEmployerJobsResponse = {
-//   status: "SUCCESS" | "ERROR";
-//   data?: Job[];
-//   message?: string;
-// };
-
 export const getEmployerJobsAction = async (): Promise<{
   status: "SUCCESS" | "ERROR";
-  data?: Job[];
+  data?: JobType[];
   message?: string;
 }> => {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser || currentUser.role !== "employer") {
-      return { status: "ERROR", data: [] };
+      return { status: "ERROR", message: ErrorMessages.UNAUTHORIZED, data: [] };
     }
 
-    const result = await db
-      .select()
-      .from(jobs)
-      .where(eq(jobs.employerId, currentUser.id))
-      .orderBy(jobs.createdAt);
+    await connectDB();
 
-    return { status: "SUCCESS", data: result as Job[] };
+    // Get employer profile
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    });
+
+    if (!employer) {
+      return { status: "ERROR", message: "Employer profile not found", data: [] };
+    }
+
+    const result = await Job.find({ 
+      employerId: employer._id 
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return { 
+      status: "SUCCESS", 
+      data: result.map(job => ({
+        id: job._id.toString(),
+        employerId: job.employerId.toString(),
+        title: job.title,
+        description: job.description,
+        tags: job.tags,
+        minSalary: job.minSalary,
+        maxSalary: job.maxSalary,
+        salaryCurrency: job.salaryCurrency,
+        salaryPeriod: job.salaryPeriod,
+        location: job.location,
+        jobType: job.jobType,
+        workType: job.workType,
+        jobLevel: job.jobLevel,
+        experience: job.experience,
+        minEducation: job.minEducation,
+        isFeatured: job.isFeatured,
+        expiresAt: job.expiresAt,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt,
+      })) as any
+    };
   } catch (error) {
+    const err = handleServerError(error);
     return {
       status: "ERROR",
-      message: "Something went wrong",
+      message: err.message,
+      data: [],
     };
   }
 };
 
-//deleteJobAction
-export const deleteJobAction = async (jobId: number) => {
+export const deleteJobAction = async (jobId: string) => {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser || currentUser.role !== "employer") {
-      return { status: "ERROR", message: "Unauthorized" };
+      return { status: "ERROR" as const, message: ErrorMessages.UNAUTHORIZED };
+    }
+
+    await connectDB();
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return { status: "ERROR" as const, message: "Invalid job ID" };
+    }
+
+    // Get employer profile
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    });
+
+    if (!employer) {
+      return { status: "ERROR" as const, message: "Employer profile not found" };
     }
 
     // Ensure the employer can only delete their own jobs
-    await db
-      .delete(jobs)
-      .where(and(eq(jobs.id, jobId), eq(jobs.employerId, currentUser.id)));
+    const result = await Job.deleteOne({
+      _id: new mongoose.Types.ObjectId(jobId),
+      employerId: employer._id,
+    });
 
-    // Optional: clear cache for the jobs page
-    // revalidatePath("/dashboard/jobs");
-
-    return { status: "SUCCESS", message: "Job deleted successfully" };
-  } catch (error) {
-    console.error("DELETE_JOB_ERROR", error);
-    return { status: "ERROR", message: "Something went wrong while deleting" };
-  }
-};
-
-export const getJobByIdAction = async (jobId: number) => {
-  try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) return { status: "ERROR", message: "Unauthorized" };
-
-    // Use db.select() instead of db.query
-    const [job] = await db
-      .select()
-      .from(jobs)
-      .where(and(eq(jobs.id, jobId), eq(jobs.employerId, currentUser.id)))
-      .limit(1);
-
-    if (!job) {
-      return { status: "ERROR", message: "Job not found" };
+    if (result.deletedCount === 0) {
+      return { status: "ERROR" as const, message: ErrorMessages.NOT_FOUND };
     }
 
-    return { status: "SUCCESS", data: job };
+    revalidatePath("/employer-dashboard/jobs");
+    return { status: "SUCCESS" as const, message: "Job deleted successfully" };
   } catch (error) {
-    return { status: "ERROR", message: "Failed to fetch job details" };
+    return handleServerError(error);
   }
 };
 
-// Replace 'JobFormValues' with your Zod schema type
-export const updateJobAction = async (jobId: number, values: any) => {
+export const getJobByIdAction = async (jobId: string) => {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return { status: "ERROR" as const, message: ErrorMessages.NOT_AUTHENTICATED };
+
+    await connectDB();
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return { status: "ERROR" as const, message: "Invalid job ID" };
+    }
+
+    // Get employer profile
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    });
+
+    if (!employer) {
+      return { status: "ERROR" as const, message: "Employer profile not found" };
+    }
+
+    const job = await Job.findOne({
+      _id: new mongoose.Types.ObjectId(jobId),
+      employerId: employer._id,
+    }).lean();
+
+    if (!job) {
+      return { status: "ERROR" as const, message: ErrorMessages.NOT_FOUND };
+    }
+
+    // Properly serialize the job data
+    const serializedJob = {
+      id: job._id.toString(),
+      employerId: job.employerId.toString(),
+      title: job.title,
+      description: job.description,
+      tags: job.tags,
+      minSalary: job.minSalary,
+      maxSalary: job.maxSalary,
+      salaryCurrency: job.salaryCurrency,
+      salaryPeriod: job.salaryPeriod,
+      location: job.location,
+      jobType: job.jobType,
+      workType: job.workType,
+      jobLevel: job.jobLevel,
+      experience: job.experience,
+      minEducation: job.minEducation,
+      isFeatured: job.isFeatured,
+      expiresAt: job.expiresAt,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+    };
+
+    return { status: "SUCCESS" as const, data: serializedJob };
+  } catch (error) {
+    return handleServerError(error);
+  }
+};
+
+export const updateJobAction = async (jobId: string, values: any) => {
   try {
     const currentUser = await getCurrentUser();
 
-    // Security check
     if (!currentUser || currentUser.role !== "employer") {
-      return { status: "ERROR", message: "Unauthorized" };
+      return { status: "ERROR" as const, message: ErrorMessages.UNAUTHORIZED };
+    }
+
+    await connectDB();
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return { status: "ERROR" as const, message: "Invalid job ID" };
+    }
+
+    // Get employer profile
+    const employer = await Employer.findOne({ 
+      userId: new mongoose.Types.ObjectId(currentUser.id) 
+    });
+
+    if (!employer) {
+      return { status: "ERROR" as const, message: "Employer profile not found" };
     }
 
     // Perform the Update
-    await db
-      .update(jobs)
-      .set({
+    const result = await Job.findOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(jobId),
+        employerId: employer._id,
+      },
+      {
         ...values,
-        updatedAt: new Date(), // Always update the timestamp
-      })
-      .where(and(eq(jobs.id, jobId), eq(jobs.employerId, currentUser.id)));
+        updatedAt: new Date(),
+      }
+    );
 
-    // Refresh the jobs list page so the new data shows up immediately
-    // revalidatePath("/employer-dashboard/jobs");
+    if (!result) {
+      return { status: "ERROR" as const, message: ErrorMessages.NOT_FOUND };
+    }
 
-    return { status: "SUCCESS", message: "Job updated successfully" };
+    revalidatePath("/employer-dashboard/jobs");
+    revalidatePath(`/employer-dashboard/jobs/${jobId}/edit`);
+    return { status: "SUCCESS" as const, message: "Job updated successfully!" };
   } catch (error) {
-    return { status: "ERROR", message: "Failed to update job" };
+    return handleServerError(error);
   }
 };

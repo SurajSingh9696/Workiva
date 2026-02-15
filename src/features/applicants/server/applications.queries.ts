@@ -1,37 +1,70 @@
-import { db } from "@/config/db";
-import { applications, jobs, employers, users } from "@/drizzle/schema";
-import { eq, desc } from "drizzle-orm";
+import { connectDB } from "@/lib/mongodb";
+import Application from "@/models/Application";
+import Job from "@/models/Job";
+import Employer from "@/models/Employer";
+import Applicant from "@/models/Applicant";
+import mongoose from "mongoose";
 
-export async function getApplicantApplications(userId: number) {
-  const applicantApplications = await db
-    .select({
-      id: applications.id,
-      jobId: applications.jobId,
-      status: applications.status,
-      coverLetter: applications.coverLetter,
-      resumeUrl: applications.resumeUrl,
-      appliedAt: applications.createdAt,
-      jobTitle: jobs.title,
-      location: jobs.location,
-      companyName: employers.name,
-      companyLogo: employers.bannerImageUrl,
+export async function getApplicantApplications(userId: string) {
+  await connectDB();
+
+  // First get the applicant profile
+  const applicant = await Applicant.findOne({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  });
+
+  if (!applicant) {
+    return [];
+  }
+
+  const applications = await Application.find({ 
+    applicantId: applicant._id 
+  })
+    .populate({
+      path: 'jobId',
+      populate: {
+        path: 'employerId',
+        model: Employer,
+      },
     })
-    .from(applications)
-    .innerJoin(jobs, eq(applications.jobId, jobs.id))
-    .innerJoin(employers, eq(jobs.employerId, employers.id))
-    .where(eq(applications.applicantId, userId))
-    .orderBy(desc(applications.createdAt));
+    .sort({ createdAt: -1 })
+    .lean();
 
-  return applicantApplications;
+  return applications.map((app: any) => ({
+    id: app._id.toString(),
+    jobId: app.jobId?._id?.toString(),
+    status: app.status,
+    coverLetter: app.coverLetter,
+    resumeUrl: app.resumeUrl,
+    appliedAt: app.createdAt,
+    jobTitle: app.jobId?.title,
+    location: app.jobId?.location,
+    companyName: app.jobId?.employerId?.name,
+    companyLogo: app.jobId?.employerId?.bannerImageUrl,
+  }));
 }
 
-export async function checkIfApplied(userId: number, jobId: number) {
-  const application = await db
-    .select()
-    .from(applications)
-    .where(eq(applications.applicantId, userId))
-    .where(eq(applications.jobId, jobId))
-    .limit(1);
+export async function checkIfApplied(userId: string, jobId: string) {
+  await connectDB();
 
-  return application.length > 0;
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(jobId)) {
+    return false;
+  }
+
+  // First get the applicant profile
+  const applicant = await Applicant.findOne({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  });
+
+  if (!applicant) {
+    return false;
+  }
+
+  const application = await Application.findOne({
+    applicantId: applicant._id,
+    jobId: new mongoose.Types.ObjectId(jobId),
+  });
+
+  return !!application;
 }

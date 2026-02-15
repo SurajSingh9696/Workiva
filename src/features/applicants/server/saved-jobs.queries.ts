@@ -1,38 +1,84 @@
-import { db } from "@/config/db";
-import { savedJobs, jobs, employers } from "@/drizzle/schema";
-import { eq, desc } from "drizzle-orm";
+import { connectDB } from "@/lib/mongodb";
+import SavedJob from "@/models/SavedJob";
+import Job from "@/models/Job";
+import Employer from "@/models/Employer";
+import User from "@/models/User";
+import Applicant from "@/models/Applicant";
+import mongoose from "mongoose";
 
-export async function getSavedJobs(userId: number) {
-  const saved = await db
-    .select({
-      id: jobs.id,
-      title: jobs.title,
-      location: jobs.location,
-      workType: jobs.workType,
-      jobType: jobs.jobType,
-      minSalary: jobs.minSalary,
-      maxSalary: jobs.maxSalary,
-      salaryCurrency: jobs.salaryCurrency,
-      createdAt: jobs.createdAt,
-      companyName: employers.name,
-      companyLogo: employers.bannerImageUrl,
+export async function getSavedJobs(userId: string) {
+  await connectDB();
+
+  // First get the applicant profile
+  const applicant = await Applicant.findOne({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  });
+
+  if (!applicant) {
+    return [];
+  }
+
+  const savedJobs = await SavedJob.find({ 
+    applicantId: applicant._id 
+  })
+    .populate({
+      path: 'jobId',
+      model: Job,
+      match: { deletedAt: null }, // Filter out deleted jobs
+      populate: {
+        path: 'employerId',
+        model: Employer,
+        populate: {
+          path: 'userId',
+          model: User,
+        },
+      },
     })
-    .from(savedJobs)
-    .innerJoin(jobs, eq(savedJobs.jobId, jobs.id))
-    .innerJoin(employers, eq(jobs.employerId, employers.id))
-    .where(eq(savedJobs.applicantId, userId))
-    .orderBy(desc(savedJobs.createdAt));
+    .sort({ createdAt: -1 })
+    .lean();
 
-  return saved;
+  // Filter out entries where jobId is null (deleted jobs)
+  return savedJobs
+    .filter((saved: any) => saved.jobId)
+    .map((saved: any) => ({
+    id: saved.jobId?._id?.toString(),
+    title: saved.jobId?.title,
+    description: saved.jobId?.description || '',
+    location: saved.jobId?.location,
+    workType: saved.jobId?.workType,
+    jobType: saved.jobId?.jobType,
+    minSalary: saved.jobId?.minSalary,
+    maxSalary: saved.jobId?.maxSalary,
+    salaryCurrency: saved.jobId?.salaryCurrency,
+    salaryPeriod: saved.jobId?.salaryPeriod || 'monthly',
+    createdAt: saved.jobId?.createdAt,
+    companyName: saved.jobId?.employerId?.name,
+    companyLogo: saved.jobId?.employerId?.userId?.avatarUrl,
+    companyBanner: saved.jobId?.employerId?.bannerImageUrl,
+  }));
 }
 
-export async function checkIfSaved(userId: number, jobId: number) {
-  const saved = await db
-    .select()
-    .from(savedJobs)
-    .where(eq(savedJobs.applicantId, userId))
-    .where(eq(savedJobs.jobId, jobId))
-    .limit(1);
+export async function checkIfSaved(userId: string, jobId: string) {
+  await connectDB();
 
-  return saved.length > 0;
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(jobId)) {
+    return false;
+  }
+
+  // First get the applicant profile
+  const applicant = await Applicant.findOne({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  });
+
+  if (!applicant) {
+    return false;
+  }
+
+  const saved = await SavedJob.findOne({
+    applicantId: applicant._id,
+    jobId: new mongoose.Types.ObjectId(jobId),
+  });
+
+  return !!saved;
 }

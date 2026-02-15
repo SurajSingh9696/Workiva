@@ -5,12 +5,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Mail, Phone, Calendar, User, ExternalLink } from "lucide-react";
+import { FileText, Mail, Phone, Calendar, User, ExternalLink, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { ApplicationStatusUpdater } from "@/features/employers/components/application-status-updater";
+import { DeleteApplicationButton } from "@/features/employers/components/delete-application-button";
+import { PageHeader } from "@/components/page-header";
+
+// Disable caching to ensure real-time updates
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface JobApplicantsPageProps {
-  params: { jobId: string };
+  params: Promise<{ jobId: string }>;
 }
 
 export default async function JobApplicantsPage({ params }: JobApplicantsPageProps) {
@@ -20,10 +26,10 @@ export default async function JobApplicantsPage({ params }: JobApplicantsPagePro
     redirect("/login");
   }
 
-  const jobId = parseInt(params.jobId);
-  if (isNaN(jobId)) return notFound();
+  const { jobId } = await params;
+  if (!jobId) return notFound();
 
-  const applications = await getJobApplications(jobId, user.id);
+  const applications = await getJobApplications(jobId, user.id.toString());
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -34,14 +40,15 @@ export default async function JobApplicantsPage({ params }: JobApplicantsPagePro
 
   return (
     <div className="space-y-6 p-6 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
-        {applications.length > 0 && (
-          <p className="text-muted-foreground mt-2">
-            {applications.length} application{applications.length !== 1 ? "s" : ""} for "{applications[0].jobTitle}"
-          </p>
-        )}
-      </div>
+      <PageHeader
+        icon={Users}
+        title="Job Applications"
+        description={
+          applications.length > 0
+            ? `${applications.length} application${applications.length !== 1 ? "s" : ""} for "${applications[0].jobTitle}"`
+            : "View and manage applications for this job"
+        }
+      />
 
       {applications.length === 0 ? (
         <Card className="p-12 text-center">
@@ -113,6 +120,9 @@ export default async function JobApplicantsPage({ params }: JobApplicantsPagePro
                     applicationId={application.id}
                     currentStatus={application.status}
                   />
+                  {application.status === "rejected" && (
+                    <DeleteApplicationButton applicationId={application.id} />
+                  )}
                 </div>
               </div>
             </Card>
