@@ -16,7 +16,7 @@ export async function updateUserThemeAction(theme: 'light' | 'dark') {
     await connectDB();
     
     await User.findByIdAndUpdate(
-      currentUser._id,
+      currentUser.id,
       { theme },
       { new: true }
     );

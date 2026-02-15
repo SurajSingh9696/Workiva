@@ -134,17 +134,17 @@ const EnhancedLoginForm: React.FC = () => {
     try {
       const result = await loginUserAction(data);
       
-      if (result?.status === "SUCCESS") {
-        toast.success("Login successful!", {
-          description: deviceInfo.isMobile 
-            ? "Welcome back! Your session is secured for mobile use."
-            : "Welcome back! You've been securely signed in.",
-          duration: 2000,
-        });
-      } else {
+      if (result?.status === "ERROR") {
         toast.error("Login failed", {
           description: result?.message || "Please check your credentials and try again.",
           duration: 4000,
+        });
+      } else {
+        toast.success("Login successful!", {
+          description: deviceInfo.isMobile
+            ? "Welcome back! Your session is secured for mobile use."
+            : "Welcome back! You've been securely signed in.",
+          duration: 2000,
         });
       }
 

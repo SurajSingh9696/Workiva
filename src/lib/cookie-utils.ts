@@ -139,15 +139,16 @@ export function getAllCookies(): Record<string, string> {
  * Check if the current context is secure (HTTPS)
  */
 export function isSecureContext(): boolean {
-  if (typeof window === 'undefined') return false;
+  const win = typeof window !== 'undefined' ? window : undefined;
+  if (!win) return false;
   
   // Check if we're in a secure context
-  if ('isSecureContext' in window) {
-    return window.isSecureContext;
+  if (typeof win.isSecureContext === 'boolean') {
+    return win.isSecureContext;
   }
   
   // Fallback: check protocol
-  return window.location.protocol === 'https:';
+  return win.location?.protocol === 'https:';
 }
 
 /**

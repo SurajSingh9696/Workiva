@@ -55,6 +55,11 @@ export type RegisterUserWithConfirmData = z.infer<
   typeof registerUserWithConfirmSchema
 >;
 
+// Input type keeps defaults optional for form usage
+export type RegisterUserWithConfirmInput = z.input<
+  typeof registerUserWithConfirmSchema
+>;
+
 export const loginUserSchema = z.object({
   email: z
     .email("Please enter a valid email address ")

@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Search, ArrowRight, LayoutDashboard } from "lucide-react";
+import { Briefcase, Search, ArrowRight, LayoutDashboard, FileText } from "lucide-react";
 import Link from "next/link";
 import { getApplicantApplications } from "@/features/applicants/server/applications.queries";
 import { getSavedJobs } from "@/features/applicants/server/saved-jobs.queries";

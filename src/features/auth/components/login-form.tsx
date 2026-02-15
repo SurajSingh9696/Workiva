@@ -35,8 +35,8 @@ const LoginForm: React.FC = () => {
     try {
       const result = await loginUserAction(data);
 
-      if (result.status === "SUCCESS") toast.success(result.message);
-      else toast.error(result.message);
+      if (result.status === "ERROR") toast.error(result.message);
+      else toast.success("Login successful");
     } catch (error) {}
   };
 

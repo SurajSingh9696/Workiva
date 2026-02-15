@@ -23,6 +23,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import {
   RegisterUserWithConfirmData,
+  RegisterUserWithConfirmInput,
   registerUserWithConfirmSchema,
 } from "@/features/auth/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +37,7 @@ const RegistrationForm = () => {
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterUserWithConfirmData>({
+  } = useForm<RegisterUserWithConfirmInput>({
     resolver: zodResolver(registerUserWithConfirmSchema),
     defaultValues: {
       role: "applicant",
@@ -48,17 +49,21 @@ const RegistrationForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const onSubmit = async (data: RegisterUserWithConfirmData) => {
+  const onSubmit = async (data: RegisterUserWithConfirmInput) => {
     try {
-      const result = await registerUserAction(data);
+      const result = await registerUserAction({
+        ...data,
+        role: data.role ?? "applicant",
+      } as RegisterUserWithConfirmData);
 
-      if (result.status === "SUCCESS") {
-        toast.success(result.message);
-        if (data.role === "employer") router.push("/employer-dashboard");
-        else router.push("/dashboard");
-      } else {
+      if (result.status === "ERROR") {
         toast.error(result.message);
+        return;
       }
+
+      toast.success("Registration successful");
+      if ((data.role ?? "applicant") === "employer") router.push("/employer-dashboard");
+      else router.push("/dashboard");
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("An unexpected error occurred. Please try again.");

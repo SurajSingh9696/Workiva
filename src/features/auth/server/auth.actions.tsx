@@ -17,9 +17,16 @@ import {
   invalidateSession,
 } from "./use-cases/sessions";
 import { cookies } from "next/headers";
-import { redirect, isRedirectError } from "next/navigation";
+import { redirect } from "next/navigation";
 import crypto from "crypto";
 import { handleServerError, ErrorMessages } from "@/lib/error-handler";
+
+// Redirect errors must be rethrown to let Next handle navigation.
+const isRedirectError = (error: unknown) => {
+  return typeof error === "object" && error !== null && "digest" in error
+    ? String((error as { digest?: string }).digest).includes("NEXT_REDIRECT")
+    : false;
+};
 
 // 👉 Server Actions in Next.js are special functions that run only on the server, not in the user’s browser.
 
@@ -78,9 +85,7 @@ export const registerUserAction = async (data: RegisterUserData) => {
     await createSessionAndSetCookies(newUser._id);
 
     // Redirect based on user role
-    if (role === "admin") {
-      redirect("/admin");
-    } else if (role === "employer") {
+    if (role === "employer") {
       redirect("/employer-dashboard");
     } else {
       redirect("/dashboard");
