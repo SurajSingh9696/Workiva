@@ -2,12 +2,13 @@ import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Bookmark, FileText, TrendingUp, Search, ArrowRight, LayoutDashboard } from "lucide-react";
+import { Briefcase, Search, ArrowRight, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { getApplicantApplications } from "@/features/applicants/server/applications.queries";
 import { getSavedJobs } from "@/features/applicants/server/saved-jobs.queries";
 import { getAllJobs } from "@/features/employers/jobs/server/jobs.queries";
 import { PageHeader } from "@/components/page-header";
+import { ApplicantStatsCards } from "@/features/applicants/components/applicant-stats-cards";
 
 // Disable caching to ensure real-time updates
 export const dynamic = 'force-dynamic';
@@ -25,32 +26,7 @@ const ApplicantDashboard = async () => {
     getAllJobs({}, 6), // Get 6 recent jobs
   ]);
 
-  const stats = [
-    {
-      label: "Applications",
-      value: applications.length,
-      icon: FileText,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      href: "/dashboard/applications",
-    },
-    {
-      label: "Saved Jobs",
-      value: savedJobs.length,
-      icon: Bookmark,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      href: "/dashboard/saved-jobs",
-    },
-    {
-      label: "Interview Invites",
-      value: applications.filter((a) => a.status === "accepted").length,
-      icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      href: "/dashboard/applications",
-    },
-  ];
+  const interviewInvitesCount = applications.filter((a) => a.status === "accepted").length;
 
   return (
     <div className="space-y-6 p-6">
@@ -61,25 +37,11 @@ const ApplicantDashboard = async () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {stats.map((stat, index) => (
-          <Link key={index} href={stat.href}>
-            <Card className="hover:shadow-md transition-all cursor-pointer border-2 hover:border-blue-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <div className={`${stat.bgColor} p-2 rounded-lg`}>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stat.value}</div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <ApplicantStatsCards
+        applicationsCount={applications.length}
+        savedJobsCount={savedJobs.length}
+        interviewInvitesCount={interviewInvitesCount}
+      />
 
       {/* Quick Actions */}
       <Card>

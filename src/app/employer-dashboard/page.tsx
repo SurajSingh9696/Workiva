@@ -41,12 +41,6 @@ const EmployerDashboard = async () => {
           description="Manage your job postings and track applications"
           className="flex-1"
         />
-        <Link href="/employer-dashboard/jobs/create" className="w-full sm:w-auto">
-          <Button size="lg" className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-            Post New Job
-          </Button>
-        </Link>
       </div>
 
       {/* Stats Cards */}
@@ -65,13 +59,21 @@ const EmployerDashboard = async () => {
 
         {/* Recent Jobs */}
         <Card>
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
           <CardTitle className="text-lg sm:text-xl">Recent Job Postings</CardTitle>
-          <Link href="/employer-dashboard/jobs">
-            <Button variant="ghost" size="sm">
-              View All <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <Link href="/employer-dashboard/jobs/create" className="w-full sm:w-auto">
+              <Button size="sm" className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Post New Job
+              </Button>
+            </Link>
+            <Link href="/employer-dashboard/jobs" className="w-full sm:w-auto">
+              <Button variant="ghost" size="sm" className="w-full sm:w-auto">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           {recentJobs.length === 0 ? (

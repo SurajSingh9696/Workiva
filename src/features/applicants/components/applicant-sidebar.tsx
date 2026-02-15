@@ -29,7 +29,13 @@ const ApplicantSidebar = ({ user, isOverlayOpen: externalOverlayOpen, onOverlayT
   
   // Use external overlay state if provided, otherwise use internal
   const isOverlayOpen = externalOverlayOpen ?? internalOverlayOpen;
-  const setIsOverlayOpen = onOverlayToggle ? () => onOverlayToggle() : setInternalOverlayOpen;
+  const toggleOverlay = () => {
+    if (onOverlayToggle) {
+      onOverlayToggle();
+    } else {
+      setInternalOverlayOpen(!internalOverlayOpen);
+    }
+  };
 
   // Set initial state based on screen size once on mount
   useEffect(() => {
@@ -91,7 +97,7 @@ const ApplicantSidebar = ({ user, isOverlayOpen: externalOverlayOpen, onOverlayT
 
   const toggleSidebar = () => {
     if (isSmallScreen) {
-      setIsOverlayOpen();
+      toggleOverlay();
     } else {
       setIsExpanded(!isExpanded);
     }
@@ -99,8 +105,8 @@ const ApplicantSidebar = ({ user, isOverlayOpen: externalOverlayOpen, onOverlayT
 
   const handleNavClick = () => {
     // Close overlay when navigation item is clicked on small screens
-    if (isSmallScreen) {
-      setIsOverlayOpen();
+    if (isSmallScreen && isOverlayOpen) {
+      toggleOverlay();
     }
   };
 
@@ -137,7 +143,7 @@ const ApplicantSidebar = ({ user, isOverlayOpen: externalOverlayOpen, onOverlayT
           {/* Close button for mobile overlay */}
           {isSmallScreen && isOverlayOpen && (
             <button
-              onClick={() => setIsOverlayOpen()}
+              onClick={toggleOverlay}
               className="absolute right-4 top-4 p-1 rounded-md hover:bg-accent"
               title="Close menu"
             >
