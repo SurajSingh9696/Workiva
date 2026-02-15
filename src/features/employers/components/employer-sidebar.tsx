@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { employerNavItems } from "@/config/constant";
 import { useState, useEffect } from "react";
 import { UserAvatar } from "@/components/user-avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface EmployerSidebarProps {
   user: {
@@ -41,9 +42,10 @@ const EmployerSidebar = ({ user }: EmployerSidebarProps) => {
       <div
         className={cn(
           "bg-card border-r border-border h-full transition-all duration-300 ease-in-out flex flex-col shrink-0",
-          // All screens: User can toggle between w-16 (collapsed) and w-64 (expanded)
-          // Default: collapsed on mobile, expanded on desktop
-          isExpanded ? "w-64" : "w-16"
+          // Responsive expansion: smaller on mobile, larger on desktop
+          // Collapsed: Always w-16 (64px)
+          // Expanded: w-48 (192px) on mobile, w-56 (224px) on sm+, w-64 (256px) on lg+
+          isExpanded ? "w-48 sm:w-56 lg:w-64" : "w-16"
         )}
       >
         {/* Logo */}
@@ -102,13 +104,27 @@ const EmployerSidebar = ({ user }: EmployerSidebarProps) => {
               className="flex-shrink-0 h-8 w-8"
             />
             {isExpanded && (
-              <div className="flex-1 min-w-0 hidden lg:block">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-muted-foreground">Employer</p>
+              <div className="flex-1 min-w-0 hidden lg:flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">Employer</p>
+                </div>
+                <div className="ml-2">
+                  <ThemeToggle />
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Theme Toggle - Collapsed State */}
+        {!isExpanded && (
+          <div className="px-3 py-1">
+            <div className="flex justify-center">
+              <ThemeToggle />
+            </div>
+          </div>
+        )}
 
         {/* Toggle Button - Now visible on all screen sizes */}
         <div className="border-t border-border px-3 py-1">

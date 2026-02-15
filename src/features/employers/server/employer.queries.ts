@@ -72,16 +72,13 @@ export async function getJobApplications(jobId: string, userId: string) {
     id: app._id.toString(),
     status: app.status,
     coverLetter: app.coverLetter,
-    resumeUrl: app.resumeUrl,
+    resumeUrl: app.resumeUrl || app.applicantId?.resumeUrl,
     appliedAt: app.createdAt,
     jobTitle: app.jobId?.title,
     applicantName: app.applicantId?.userId?.name,
     applicantEmail: app.applicantId?.userId?.email,
     applicantPhone: app.applicantId?.userId?.phoneNumber,
     applicantBio: app.applicantId?.biography,
-    applicantLocation: app.applicantId?.location,
-    applicantEducation: app.applicantId?.education,
-    applicantExperience: app.applicantId?.experience,
   }));
 }
 
@@ -188,6 +185,6 @@ export async function getAllEmployerApplications() {
     applicantName: app.applicantId?.userId?.name,
     applicantEmail: app.applicantId?.userId?.email,
     applicantPhone: app.applicantId?.userId?.phoneNumber,
-    resumeUrl: app.resumeUrl,
+    resumeUrl: app.resumeUrl || app.applicantId?.resumeUrl,
   }));
 }

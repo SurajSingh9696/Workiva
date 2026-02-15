@@ -59,9 +59,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       <div
         className={cn(
           "bg-card border-r border-border h-full transition-all duration-300 ease-in-out flex flex-col shrink-0",
-          // All screens: User can toggle between w-16 (collapsed) and w-64 (expanded)
-          // Default: collapsed on mobile, expanded on desktop
-          isExpanded ? "w-64" : "w-16"
+          // Responsive expansion: smaller on mobile, larger on desktop
+          // Collapsed: Always w-16 (64px)
+          // Expanded: w-48 (192px) on mobile, w-56 (224px) on sm+, w-64 (256px) on lg+
+          isExpanded ? "w-48 sm:w-56 lg:w-64" : "w-16"
         )}
       >
         {/* Logo */}

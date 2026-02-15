@@ -51,12 +51,16 @@ export async function applyToJobAction(jobId: string, coverLetter?: string) {
       return { status: "ERROR" as const, message: "You have already applied to this job" };
     }
 
+    // Get the current resume URL from applicant profile
+    const currentResume = applicant.resumeUrl;
+
     // Create application
     const newApplication = await Application.create({
       jobId: new mongoose.Types.ObjectId(jobId),
       applicantId: applicant._id,
       coverLetter,
       status: "pending",
+      resumeUrl: currentResume, // Store current resume URL
     });
 
     console.log("[APPLY] Application created:", {

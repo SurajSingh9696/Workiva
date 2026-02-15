@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Mail, Phone, Calendar, User, ExternalLink, Trash2, Users } from "lucide-react";
+import { FileText, Mail, Phone, Calendar, User, ExternalLink, Trash2, Users, Download } from "lucide-react";
 import Link from "next/link";
 import { ApplicationStatusUpdater } from "@/features/employers/components/application-status-updater";
 import { DeleteApplicationButton } from "@/features/employers/components/delete-application-button";
@@ -68,11 +68,25 @@ export default async function JobApplicantsPage({ params }: JobApplicantsPagePro
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
                       <h3 className="text-xl font-semibold">{application.applicantName}</h3>
                       <Badge className={statusColors[application.status as keyof typeof statusColors]}>
                         {application.status}
                       </Badge>
+                      {/* Resume Download btn */}
+                      {application.resumeUrl && (
+                        <a 
+                          href={application.resumeUrl}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Download className="h-4 w-4" />
+                            Resume
+                          </Button>
+                        </a>
+                      )}
                     </div>
                     
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

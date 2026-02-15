@@ -12,11 +12,15 @@ export async function getApplicantProfile(userId: string) {
 
     if (!profile) return null;
 
-    // Convert ObjectIds to strings for client component compatibility
+    // Convert ObjectIds to strings and format date for HTML input
     return {
       ...profile,
       _id: profile._id.toString(),
       userId: profile.userId.toString(),
+      // Format dateOfBirth to YYYY-MM-DD for HTML date input
+      dateOfBirth: profile.dateOfBirth 
+        ? new Date(profile.dateOfBirth).toISOString().split('T')[0] 
+        : null,
     };
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
