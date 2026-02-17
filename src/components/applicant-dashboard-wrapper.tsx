@@ -34,7 +34,7 @@ export default function ApplicantDashboardWrapper({ user, children }: ApplicantD
         
         {/* Main Content */}
         <main className="flex-1 h-full overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8">
+          <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             {children}
           </div>
         </main>

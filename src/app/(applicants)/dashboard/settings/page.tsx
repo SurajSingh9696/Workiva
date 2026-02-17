@@ -14,7 +14,7 @@ export default async function ApplicantSettingsPage() {
   const profile = await getApplicantProfile(user.id);
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-6">
       <PageHeader
         icon={Settings}
         title="Profile Settings"
