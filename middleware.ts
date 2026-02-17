@@ -1,8 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Rate limiting storage (in production, use Redis or database)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-
 // CSRF protection uses double-submit cookies (header must match cookie)
 
 // Security headers configuration
@@ -28,14 +25,6 @@ const securityHeaders = {
     "frame-ancestors 'none'",
     "upgrade-insecure-requests"
   ].join('; ')
-};
-
-// Rate limiting configuration
-const RATE_LIMIT = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // per IP
-  authMaxRequests: 5, // for auth endpoints
-  authWindowMs: 15 * 60 * 1000 // 15 minutes for auth
 };
 
 // Protected routes that require authentication
@@ -73,27 +62,6 @@ function getClientIP(request: NextRequest): string {
   return request.nextUrl.hostname || 'unknown';
 }
 
-function isRateLimited(ip: string, isAuthRoute: boolean = false): boolean {
-  const now = Date.now();
-  const key = `${ip}:${isAuthRoute ? 'auth' : 'general'}`;
-  const limit = isAuthRoute ? RATE_LIMIT.authMaxRequests : RATE_LIMIT.maxRequests;
-  const window = isAuthRoute ? RATE_LIMIT.authWindowMs : RATE_LIMIT.windowMs;
-  
-  const stored = rateLimitStore.get(key);
-  
-  if (!stored || now > stored.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + window });
-    return false;
-  }
-  
-  if (stored.count >= limit) {
-    return true;
-  }
-  
-  stored.count++;
-  return false;
-}
-
 function generateCSRFToken(): string {
   // Use Web Crypto API instead of Node.js crypto for Edge Runtime compatibility
   const array = new Uint8Array(32);
@@ -120,8 +88,6 @@ function isAPIRoute(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ip = getClientIP(request);
-  
   // Create response
   const response = NextResponse.next();
   
@@ -130,27 +96,6 @@ export async function middleware(request: NextRequest) {
     response.headers.set(key, value);
   });
   
-  // Rate limiting
-  const isAuth = isAuthRoute(pathname);
-  if (isRateLimited(ip, isAuth)) {
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Too many requests',
-        message: isAuth 
-          ? 'Too many login attempts. Please try again later.' 
-          : 'Rate limit exceeded. Please try again later.'
-      }),
-      { 
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': '900', // 15 minutes
-          ...Object.fromEntries(Object.entries(securityHeaders))
-        }
-      }
-    );
-  }
-
   // Get session cookie
   const sessionCookie = request.cookies.get('session');
   
