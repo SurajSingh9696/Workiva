@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginUserData, loginUserSchema } from "@/features/auth/auth.schema";
+import { handleAuthError } from "@/lib/redirect-utils";
 
 const LoginForm: React.FC = () => {
   const {
@@ -35,9 +36,15 @@ const LoginForm: React.FC = () => {
     try {
       const result = await loginUserAction(data);
 
-      if (result.status === "ERROR") toast.error(result.message);
-      else toast.success("Login successful");
-    } catch (error) {}
+      if (result?.status === "ERROR") {
+        toast.error(result.message);
+      }
+      // Success case: redirect happens automatically from server action
+    } catch (error) {
+      // Handle redirect and other errors
+      const { message, description } = handleAuthError(error);
+      toast.error(message, { description });
+    }
   };
 
   return (

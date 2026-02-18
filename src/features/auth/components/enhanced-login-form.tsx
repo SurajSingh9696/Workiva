@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginUserData, loginUserSchema } from "@/features/auth/auth.schema";
 import { areCookiesEnabled } from "@/lib/cookie-utils";
+import { handleAuthError } from "@/lib/redirect-utils";
 
 const EnhancedLoginForm: React.FC = () => {
   const {
@@ -139,38 +140,14 @@ const EnhancedLoginForm: React.FC = () => {
           description: result?.message || "Please check your credentials and try again.",
           duration: 4000,
         });
-      } else {
-        toast.success("Login successful!", {
-          description: deviceInfo.isMobile
-            ? "Welcome back! Your session is secured for mobile use."
-            : "Welcome back! You've been securely signed in.",
-          duration: 2000,
-        });
       }
+      // Success case: redirect happens automatically from server action
 
     } catch (error: any) {
-      console.error('Login error:', error);
-      
-      // Handle different error types for mobile users
-      let errorMessage = "An unexpected error occurred. Please try again.";
-      let errorDescription = "If the problem persists, please contact support.";
-      
-      if (error.message?.includes('rate limit') || error.message?.includes('429')) {
-        errorMessage = "Too many attempts";
-        errorDescription = "Please wait 15 minutes before trying again.";
-      } else if (error.message?.includes('network') || error.name === 'NetworkError') {
-        errorMessage = "Network error";
-        errorDescription = "Please check your internet connection and try again.";
-      } else if (error.message?.includes('timeout')) {
-        errorMessage = "Request timeout";
-        errorDescription = "The login request took too long. Please try again.";
-      } else if (error.message?.includes('502') || error.message?.includes('503')) {
-        errorMessage = "Service unavailable";
-        errorDescription = "Our servers are temporarily unavailable. Please try again in a few minutes.";
-      }
-      
-      toast.error(errorMessage, {
-        description: errorDescription,
+      // Handle redirect and other errors appropriately
+      const { message, description } = handleAuthError(error);
+      toast.error(message, {
+        description,
         duration: 6000,
       });
     } finally {

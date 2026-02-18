@@ -28,8 +28,8 @@ import {
 } from "@/features/auth/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { registerUserAction } from "../server/auth.actions";
+import { handleAuthError } from "@/lib/redirect-utils";
 
 const RegistrationForm = () => {
   const {
@@ -44,8 +44,6 @@ const RegistrationForm = () => {
     },
   });
 
-  const router = useRouter();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -56,17 +54,15 @@ const RegistrationForm = () => {
         role: data.role ?? "applicant",
       } as RegisterUserWithConfirmData);
 
-      if (result.status === "ERROR") {
+      if (result?.status === "ERROR") {
         toast.error(result.message);
         return;
       }
-
-      toast.success("Registration successful");
-      if ((data.role ?? "applicant") === "employer") router.push("/employer-dashboard");
-      else router.push("/dashboard");
+      // Success case: redirect happens automatically from server action
     } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      // Handle redirect and other errors
+      const { message, description } = handleAuthError(error);
+      toast.error(message, { description });
     }
   };
 
