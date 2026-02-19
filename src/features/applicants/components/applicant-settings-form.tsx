@@ -115,7 +115,7 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Personal Information */}
       <Card>
         <CardHeader>
