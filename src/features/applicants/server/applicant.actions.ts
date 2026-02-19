@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { handleServerError, ErrorMessages } from "@/lib/error-handler";
+import { transformForDb } from "@/lib/db-transformers";
 
 export async function applyToJobAction(jobId: string, coverLetter?: string) {
   try {
@@ -153,10 +154,13 @@ export async function updateApplicantProfileAction(data: any) {
 
     const { phoneNumber, name, ...applicantData } = data;
 
+    // Transform UI values to database values
+    const transformedData = transformForDb(applicantData);
+
     // Update or create applicant profile
     await Applicant.findOneAndUpdate(
       { userId: new mongoose.Types.ObjectId(user.id) },
-      applicantData,
+      transformedData,
       { upsert: true, new: true }
     );
 

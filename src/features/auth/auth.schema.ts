@@ -32,10 +32,10 @@ export const registerUserSchema = z.object({
     ),
 
   role: z
-    .enum(["applicant", "employer"], {
+    .enum(["Applicant", "Employer"], {
       error: "Role must be an applicant or employer",
     })
-    .default("applicant"),
+    .default("Applicant"),
 });
 
 // z.infer automatically creates a TypeScript type from your Zod schema.

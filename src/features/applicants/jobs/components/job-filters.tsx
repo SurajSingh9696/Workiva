@@ -92,8 +92,8 @@ export const JobFilters = () => {
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             {JOB_TYPE.map((type) => (
-              <SelectItem key={type} value={type} className="capitalize">
-                {type.replace(/-/g, " ")}
+              <SelectItem key={type} value={type}>
+                {type}
               </SelectItem>
             ))}
           </SelectContent>
@@ -113,8 +113,8 @@ export const JobFilters = () => {
           <SelectContent>
             <SelectItem value="all">All Levels</SelectItem>
             {JOB_LEVEL.map((type) => (
-              <SelectItem key={type} value={type} className="capitalize">
-                {type.replace(/-/g, " ")}
+              <SelectItem key={type} value={type}>
+                {type}
               </SelectItem>
             ))}
           </SelectContent>
@@ -134,8 +134,8 @@ export const JobFilters = () => {
           <SelectContent>
             <SelectItem value="all">All Work Styles</SelectItem>
             {WORK_TYPE.map((type) => (
-              <SelectItem key={type} value={type} className="capitalize">
-                {type.replace(/-/g, " ")}
+              <SelectItem key={type} value={type}>
+                {type}
               </SelectItem>
             ))}
           </SelectContent>

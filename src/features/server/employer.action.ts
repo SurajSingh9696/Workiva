@@ -8,6 +8,7 @@ import { EmployerProfileData } from "../employers/employers.schema";
 import mongoose from "mongoose";
 import { handleServerError, ErrorMessages } from "@/lib/error-handler";
 import { revalidatePath } from "next/cache";
+import { transformForDb } from "@/lib/db-transformers";
 
 export const updateEmployerProfileAction = async (
   data: EmployerProfileData
@@ -43,21 +44,24 @@ export const updateEmployerProfileAction = async (
 
     await connectDB();
 
+    // Transform UI values to database values
+    const transformedData = transformForDb({
+      name,
+      description,
+      location,
+      websiteUrl,
+      organizationType,
+      teamSize,
+      bannerImageUrl,
+      yearOfEstablishment: yearOfEstablishment
+        ? parseInt(yearOfEstablishment)
+        : null,
+    });
+
     // Update employer profile
     const updatedEmployer = await Employer.findOneAndUpdate(
       { userId: new mongoose.Types.ObjectId(currentUser.id) },
-      {
-        name,
-        description,
-        location,
-        websiteUrl,
-        organizationType,
-        teamSize,
-        bannerImageUrl,
-        yearOfEstablishment: yearOfEstablishment
-          ? parseInt(yearOfEstablishment)
-          : null,
-      },
+      transformedData,
       { upsert: true, new: true }
     );
 

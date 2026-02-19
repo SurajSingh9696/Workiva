@@ -6,6 +6,7 @@ import {
   SALARY_PERIOD,
   WORK_TYPE,
 } from "@/config/constant";
+import { toDbValue } from "@/lib/db-transformers";
 import { z } from "zod";
 
 export const jobSchema = z
@@ -75,6 +76,7 @@ export const jobSchema = z
       .enum(SALARY_PERIOD, {
         error: "Please select a valid salary period",
       })
+      .transform((val) => toDbValue(val) as "hourly" | "monthly" | "yearly")
       .optional(),
     location: z
       .string()
@@ -85,13 +87,13 @@ export const jobSchema = z
       .or(z.literal("")),
     jobType: z.enum(JOB_TYPE, {
       error: "Please select a valid job type",
-    }),
+    }).transform((val) => toDbValue(val) as "remote" | "hybrid" | "on-site"),
     workType: z.enum(WORK_TYPE, {
       error: "Please select a valid work type",
-    }),
+    }).transform((val) => toDbValue(val) as "full-time" | "part-time" | "contract" | "temporary" | "freelance"),
     jobLevel: z.enum(JOB_LEVEL, {
       error: "Please select a valid job level",
-    }),
+    }).transform((val) => toDbValue(val) as "internship" | "entry level" | "junior" | "mid level" | "senior level" | "lead" | "manager" | "director" | "executive"),
     experience: z
       .string()
       .trim()
@@ -102,6 +104,7 @@ export const jobSchema = z
       .enum(MIN_EDUCATION, {
         error: "Please select a valid education level",
       })
+      .transform((val) => toDbValue(val) as "none" | "high school" | "undergraduate" | "masters" | "phd")
       .optional(),
 
     // 2026-01-05  ✅  01-05-2026  ❌  2026/01/05  ❌

@@ -177,9 +177,9 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -190,9 +190,9 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Single</SelectItem>
-                  <SelectItem value="married">Married</SelectItem>
-                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Married">Married</SelectItem>
+                  <SelectItem value="Divorced">Divorced</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -237,11 +237,11 @@ export function ApplicantSettingsForm({ initialData }: ApplicantSettingsFormProp
                   <SelectValue placeholder="Select education" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="high school">High School</SelectItem>
-                  <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                  <SelectItem value="masters">Master's</SelectItem>
-                  <SelectItem value="phd">PhD</SelectItem>
+                  <SelectItem value="None">None</SelectItem>
+                  <SelectItem value="High School">High School</SelectItem>
+                  <SelectItem value="Undergraduate">Undergraduate</SelectItem>
+                  <SelectItem value="Masters">Master's</SelectItem>
+                  <SelectItem value="PhD">PhD</SelectItem>
                 </SelectContent>
               </Select>
             </div>

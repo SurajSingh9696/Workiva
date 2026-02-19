@@ -23,36 +23,36 @@ export const SALARY_CURRENCY = [
   "NPR",
 ] as const;
 
-export const SALARY_PERIOD = ["hourly", "monthly", "yearly"] as const;
+export const SALARY_PERIOD = ["Hourly", "Monthly", "Yearly"] as const;
 
-export const JOB_TYPE = ["remote", "hybrid", "on-site"] as const;
+export const JOB_TYPE = ["Remote", "Hybrid", "On-site"] as const;
 
 export const WORK_TYPE = [
-  "full-time",
-  "part-time",
-  "contract",
-  "temporary",
-  "freelance",
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Temporary",
+  "Freelance",
 ] as const;
 
 export const JOB_LEVEL = [
-  "internship",
-  "entry level",
-  "junior",
-  "mid level",
-  "senior level",
-  "lead",
-  "manager",
-  "director",
-  "executive",
+  "Internship",
+  "Entry Level",
+  "Junior",
+  "Mid Level",
+  "Senior Level",
+  "Lead",
+  "Manager",
+  "Director",
+  "Executive",
 ] as const;
 
 export const MIN_EDUCATION = [
-  "none",
-  "high school",
-  "undergraduate",
-  "masters",
-  "phd",
+  "None",
+  "High School",
+  "Undergraduate",
+  "Masters",
+  "PhD",
 ] as const;
 
 // =====================================================

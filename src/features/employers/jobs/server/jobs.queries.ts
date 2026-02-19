@@ -3,6 +3,7 @@ import Job from "@/models/Job";
 import Employer from "@/models/Employer";
 import User from "@/models/User";
 import mongoose from "mongoose";
+import { toDbValue } from "@/lib/db-transformers";
 
 export interface JobFilterParams {
   search?: string;
@@ -40,15 +41,15 @@ export async function getAllJobs(filters: JobFilterParams = {}, limit?: number) 
 
   // Add other filters
   if (filters?.jobType && filters.jobType !== "all") {
-    query.jobType = filters.jobType;
+    query.jobType = toDbValue(filters.jobType);
   }
 
   if (filters?.jobLevel && filters.jobLevel !== "all") {
-    query.jobLevel = filters.jobLevel;
+    query.jobLevel = toDbValue(filters.jobLevel);
   }
 
   if (filters?.workType && filters.workType !== "all") {
-    query.workType = filters.workType;
+    query.workType = toDbValue(filters.workType);
   }
 
   let jobQuery = Job.find(query)

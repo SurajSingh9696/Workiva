@@ -40,7 +40,7 @@ const RegistrationForm = () => {
   } = useForm<RegisterUserWithConfirmInput>({
     resolver: zodResolver(registerUserWithConfirmSchema),
     defaultValues: {
-      role: "applicant",
+      role: "Applicant",
     },
   });
 
@@ -163,8 +163,8 @@ const RegistrationForm = () => {
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="applicant">Job Applicant</SelectItem>
-                      <SelectItem value="employer">Employer</SelectItem>
+                      <SelectItem value="Applicant">Job Applicant</SelectItem>
+                      <SelectItem value="Employer">Employer</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

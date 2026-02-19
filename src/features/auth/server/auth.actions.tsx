@@ -72,12 +72,12 @@ export const registerUserAction = async (data: RegisterUserData) => {
       userName,
       email,
       password: hashPassword,
-      role,
+      role: role.toLowerCase() as "applicant" | "employer", // Transform to lowercase for DB
     });
 
-    if (role === "applicant") {
+    if (role.toLowerCase() === "applicant") {
       await Applicant.create({ userId: newUser._id });
-    } else if (role === "employer") {
+    } else if (role.toLowerCase() === "employer") {
       await Employer.create({ userId: newUser._id });
     }
     // Note: Admin users don't need an Applicant or Employer record
@@ -85,7 +85,7 @@ export const registerUserAction = async (data: RegisterUserData) => {
     await createSessionAndSetCookies(newUser._id);
 
     // Redirect based on user role
-    if (role === "employer") {
+    if (role.toLowerCase() === "employer") {
       redirect("/employer-dashboard");
     } else {
       redirect("/dashboard");

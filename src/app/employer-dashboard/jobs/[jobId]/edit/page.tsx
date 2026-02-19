@@ -8,7 +8,7 @@ interface EditJobPageProps {
   params: Promise<{ jobId: string }>;
 }
 
-export const EditJobPage = async ({ params }: EditJobPageProps) => {
+export default async function EditJobPage({ params }: EditJobPageProps) {
   const { jobId } = await params;
 
   // 1. Fetch Data
@@ -34,6 +34,4 @@ export const EditJobPage = async ({ params }: EditJobPageProps) => {
       <JobForm initialData={job} isEditMode={true} />
     </div>
   );
-};
-
-export default EditJobPage;
+}
